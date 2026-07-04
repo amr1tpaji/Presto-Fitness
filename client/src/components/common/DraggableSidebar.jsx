@@ -75,6 +75,8 @@ export default function DraggableSidebar() {
     );
   }
 
+  return (
+    <>
       {/* Fixed Menu Button at Top Left */}
       <button 
         className="draggable-fab"
