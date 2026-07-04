@@ -4,9 +4,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { tasksAPI } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import Loader from '../../components/common/Loader';
-import Button from '../../components/common/Button';
 import {
-  Sun, Moon, Sunrise, CheckCircle2, Circle, Flame, Scale,
+  Sun, Moon, Sunrise, CheckCircle2, Circle, Scale,
   Target, Star, UtensilsCrossed, Dumbbell, Apple, Sparkles,
 } from 'lucide-react';
 import '../../styles/client.css';
@@ -73,7 +72,6 @@ export default function Home() {
   };
 
   const completedCount = tasks.filter((t) => t.isCompleted).length;
-  const totalPoints = tasks.reduce((sum, t) => sum + (t.isCompleted ? (t.points || 0) : 0), 0);
 
   return (
     <div className="page client-home">

@@ -1,12 +1,11 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { adminAPI, getImageUrl, weightAPI } from '../../services/api';
+import { adminAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import WorkoutBuilder from '../../components/admin/WorkoutBuilder';
 import DietPlanBuilder from '../../components/admin/DietPlanBuilder';
 import LabReportUploader from '../../components/admin/LabReportUploader';
 import TaskManager from '../../components/admin/TaskManager';
-import RewardManager from '../../components/admin/RewardManager';
 import WeightChart from '../../components/admin/WeightChart';
 import MealLogViewer from '../../components/admin/MealLogViewer';
 import Badge from '../../components/common/Badge';
@@ -37,8 +36,6 @@ export default function ClientDetail() {
   const [activeTab, setActiveTab] = useState('overview');
   const [labReports, setLabReports] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [adminWeightInput, setAdminWeightInput] = useState('');
-  const [updatingWeight, setUpdatingWeight] = useState(false);
   const navigate = useNavigate();
 
   const fetchClient = useCallback(async () => {

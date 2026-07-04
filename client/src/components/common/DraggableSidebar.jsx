@@ -36,10 +36,6 @@ export default function DraggableSidebar() {
   // For mobile floating menu
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 150 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef(null);
-  const startPos = useRef({ x: 0, y: 0 });
-  const currentPos = useRef({ x: 20, y: window.innerHeight - 150 });
 
   // Handle window resize to keep button on screen
   useEffect(() => {
