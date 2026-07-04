@@ -5,6 +5,19 @@
   padding-bottom: 80px;
 }
 
+.client-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  min-height: calc(100vh - var(--navbar-height));
+  transition: margin-left var(--transition);
+}
+
+@media (max-width: 768px) {
+  .client-main {
+    margin-left: 0;
+  }
+}
+
 /* ===== Bottom Tab Navigation ===== */
 .bottom-tabs {
   position: fixed;
