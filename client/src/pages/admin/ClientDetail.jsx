@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { adminAPI, getImageUrl } from '../../services/api';
+import { adminAPI, getImageUrl, weightAPI } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import WorkoutBuilder from '../../components/admin/WorkoutBuilder';
 import DietPlanBuilder from '../../components/admin/DietPlanBuilder';
@@ -37,6 +37,8 @@ export default function ClientDetail() {
   const [activeTab, setActiveTab] = useState('overview');
   const [labReports, setLabReports] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [adminWeightInput, setAdminWeightInput] = useState('');
+  const [updatingWeight, setUpdatingWeight] = useState(false);
   const navigate = useNavigate();
 
   const fetchClient = useCallback(async () => {
@@ -69,6 +71,26 @@ export default function ClientDetail() {
   const handleLabUpload = () => {
     fetchClient();
     addToast('Lab report uploaded successfully', 'success');
+  };
+
+  const handleAdminUpdateWeight = async (e) => {
+    e.preventDefault();
+    const w = parseFloat(adminWeightInput);
+    if (!w || w < 20 || w > 300) {
+      addToast('Please enter a valid weight (20-300 kg)', 'error');
+      return;
+    }
+    setUpdatingWeight(true);
+    try {
+      await weightAPI.log({ weight: w, userId: id });
+      addToast('Client weight updated', 'success');
+      setAdminWeightInput('');
+      fetchClient();
+    } catch (err) {
+      addToast('Failed to update weight', 'error');
+    } finally {
+      setUpdatingWeight(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -196,6 +218,23 @@ export default function ClientDetail() {
                     <p className="text-muted">No weight data logged yet</p>
                   </div>
                 )}
+                <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                  <form onSubmit={handleAdminUpdateWeight} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      className="form-input"
+                      placeholder="Enter new weight (kg)..."
+                      value={adminWeightInput}
+                      onChange={(e) => setAdminWeightInput(e.target.value)}
+                      style={{ margin: 0, flex: 1 }}
+                      disabled={updatingWeight}
+                    />
+                    <button type="submit" className="btn btn-primary btn-sm" disabled={updatingWeight || !adminWeightInput}>
+                      {updatingWeight ? 'Saving...' : 'Log Weight'}
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
             <div className="card">

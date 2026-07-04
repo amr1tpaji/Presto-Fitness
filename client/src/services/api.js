@@ -118,7 +118,7 @@ export const dietsAPI = {
 // ===== Weight API =====
 export const weightAPI = {
   log: (data) => API.post('/weight', data),
-  getHistory: () => API.get('/weight/history'),
+  getHistory: () => API.get('/weight'),
   getClientHistory: (clientId) => API.get(`/weight/client/${clientId}`),
   updateGoalWeight: (data) => API.put('/weight/goal', data),
 };

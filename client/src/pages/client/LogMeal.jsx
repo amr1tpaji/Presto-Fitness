@@ -163,7 +163,7 @@ export default function LogMeal() {
                 }}>
                   {msg.photo && (
                     <div style={{ marginBottom: '0.5rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-                      <img src={msg.photo} alt="Upload preview" style={{ maxWidth: 150, maxHeight: 150, objectFit: 'cover' }} />
+                      <img src={msg.photo} alt="Upload preview" style={{ maxWidth: 100, maxHeight: 100, objectFit: 'cover' }} />
                     </div>
                   )}
                   <p style={{ margin: 0, lineHeight: 1.5 }}>{msg.text}</p>
@@ -188,7 +188,7 @@ export default function LogMeal() {
         {/* Chat Input View */}
         <div style={{ padding: '1rem', borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
           {photoPreview && (
-            <div style={{ position: 'relative', width: 80, height: 80, marginBottom: '0.5rem', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', width: 50, height: 50, marginBottom: '0.5rem', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
               <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <button
                 type="button"

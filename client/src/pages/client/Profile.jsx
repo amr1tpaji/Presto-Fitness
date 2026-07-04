@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { ToastContext } from '../../context/ToastContext';
-import { authAPI, getImageUrl } from '../../services/api';
+import { authAPI, getImageUrl, weightAPI } from '../../services/api';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Badge from '../../components/common/Badge';
@@ -19,6 +19,7 @@ export default function Profile() {
     dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
     gender: user?.gender || '',
     height: user?.height || '',
+    currentWeight: user?.currentWeight || '',
     goalWeight: user?.goalWeight || '',
   });
   const [passwords, setPasswords] = useState({
@@ -59,6 +60,11 @@ export default function Profile() {
       if (avatarFile) formData.append('file', avatarFile);
 
       await authAPI.updateProfile(formData);
+      
+      if (profile.currentWeight && profile.currentWeight !== user?.currentWeight) {
+        await weightAPI.log({ weight: Number(profile.currentWeight) });
+      }
+
       addToast('Profile updated successfully!', 'success');
       if (reloadUser) reloadUser();
     } catch (err) {
@@ -284,6 +290,15 @@ export default function Profile() {
                   onChange={handleProfileChange('height')}
                   icon={<Ruler size={18} />}
                   placeholder="e.g. 175"
+                />
+                <Input
+                  label="Current Weight (kg)"
+                  type="number"
+                  step="0.1"
+                  value={profile.currentWeight}
+                  onChange={handleProfileChange('currentWeight')}
+                  icon={<Target size={18} />}
+                  placeholder="e.g. 75"
                 />
                 <Input
                   label="Goal Weight (kg)"
