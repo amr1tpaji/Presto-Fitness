@@ -6,12 +6,19 @@ const mongoose = require('mongoose');
  * in a degraded state without a database.
  */
 const connectDB = async () => {
+  if (!process.env.MONGODB_URI) {
+    console.error(`❌ MONGODB_URI is missing. Please add it to your Render Environment Variables!`);
+    console.warn(`⚠️ The server is running, but database features will not work until this is fixed.`);
+    return;
+  }
+
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`❌ MongoDB connection error: ${error.message}`);
-    process.exit(1);
+    // Do not crash the server in production so Render deployment still succeeds
+    console.warn(`⚠️ The server is running without a database.`);
   }
 };
 

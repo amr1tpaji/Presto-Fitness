@@ -8,9 +8,9 @@ services:
     autoDeploy: true
     envVars:
       - key: NODE_ENV
-        value: production
+        value: "production"
       - key: PORT
-        value: 10000
+        value: "10000"
       - key: CLIENT_URL
         value: https://presto-fitness.web.app
       - key: MONGODB_URI
