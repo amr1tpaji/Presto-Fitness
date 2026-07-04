@@ -191,7 +191,38 @@ export default function ClientDetail() {
               </div>
               <div className="card-body">
                 {client.weightLog && client.weightLog.length > 0 ? (
-                  <WeightChart data={client.weightLog} goalWeight={client.goalWeight} />
+                  <>
+                    <WeightChart data={client.weightLog} goalWeight={client.goalWeight} />
+                    <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                      <h4 style={{ margin: '0 0 1rem 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Log History</h4>
+                      <div className="flex-col gap-sm" style={{ maxHeight: 200, overflowY: 'auto' }}>
+                        {[...client.weightLog]
+                          .sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt))
+                          .map((entry, idx) => (
+                            <div
+                              key={entry._id || idx}
+                              className="flex flex-between"
+                              style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--border, #333)', alignItems: 'center' }}
+                            >
+                              <div>
+                                <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{entry.weight} kg</span>
+                                {entry.note && (
+                                  <p className="text-muted" style={{ fontSize: '0.8rem', margin: '2px 0 0' }}>
+                                    {entry.note}
+                                  </p>
+                                )}
+                              </div>
+                              <span className="text-muted" style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
+                                {new Date(entry.date || entry.createdAt).toLocaleDateString('en-IN', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                })}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <div className="empty-state">
                     <Activity size={32} />
