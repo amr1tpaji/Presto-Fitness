@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { chatAPI } from '../../services/api';
+import { chatAPI, messagesAPI } from '../../services/api';
 import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle } from 'lucide-react';
 import { ToastContext } from '../../context/ToastContext';
 
@@ -13,8 +13,21 @@ export default function Chatbot() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef(null);
   const { addToast } = useContext(ToastContext);
+
+  useEffect(() => {
+    const checkUnread = async () => {
+      try {
+        const res = await messagesAPI.getUnreadCount();
+        setUnreadCount(res.data?.data?.unreadCount || 0);
+      } catch (err) {}
+    };
+    checkUnread();
+    const interval = setInterval(checkUnread, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -85,6 +98,16 @@ export default function Chatbot() {
             }}
           >
             <MessageCircle size={24} />
+            {unreadCount > 0 && (
+              <div style={{
+                position: 'absolute', top: -2, right: -2, background: 'var(--danger, #ef4444)',
+                color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', borderRadius: '50%',
+                width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              }}>
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </div>
+            )}
           </button>
         </>
       )}

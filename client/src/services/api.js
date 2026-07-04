@@ -176,6 +176,7 @@ export const messagesAPI = {
   getTrainers: () => API.get('/messages/admin/trainers'),
   getConversation: (userId, params) => API.get(`/messages/${userId}`, { params }),
   sendMessage: (data) => API.post('/messages', data),
+  getUnreadCount: () => API.get('/messages/unread'),
 };
 
 // ===== Meal Chat API =====

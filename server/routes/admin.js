@@ -28,7 +28,7 @@ router.get('/clients', async (req, res, next) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    const [clients, total] = await Promise.all([
+    const [clientsRaw, total] = await Promise.all([
       User.find(filter)
         .select('name phone email avatar gender currentWeight subscription rewards.streak rewards.points isPhoneVerified activationKey')
         .sort({ createdAt: -1 })
@@ -36,6 +36,18 @@ router.get('/clients', async (req, res, next) => {
         .limit(parseInt(limit)),
       User.countDocuments(filter),
     ]);
+
+    const Message = require('../models/Message');
+    const clients = await Promise.all(
+      clientsRaw.map(async (client) => {
+        const unreadCount = await Message.countDocuments({
+          sender: client._id,
+          receiver: req.user._id,
+          read: false,
+        });
+        return { ...client.toObject(), unreadCount };
+      })
+    );
 
     res.json({
       success: true,

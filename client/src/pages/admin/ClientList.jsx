@@ -93,8 +93,19 @@ export default function ClientList() {
                                 justifyContent: 'center',
                                 color: 'var(--bg-primary, #000)',
                                 fontWeight: 700,
+                                position: 'relative'
                               }}
                             >
+                              {client.unreadCount > 0 && (
+                                <div style={{
+                                  position: 'absolute', top: -4, right: -4, background: 'var(--danger, #ef4444)',
+                                  color: '#fff', fontSize: '0.65rem', fontWeight: 'bold', borderRadius: '50%',
+                                  width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)', zIndex: 2
+                                }}>
+                                  {client.unreadCount > 9 ? '9+' : client.unreadCount}
+                                </div>
+                              )}
                               {client.avatar ? (
                                 <img 
                                   src={getImageUrl(client.avatar)} 

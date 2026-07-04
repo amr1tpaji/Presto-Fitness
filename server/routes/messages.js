@@ -8,6 +8,23 @@ const router = express.Router();
 
 router.use(protect);
 
+// ── GET /api/messages/unread ───────────────────────────────────────────────
+// Get total unread messages for the current user
+router.get('/unread', async (req, res, next) => {
+  try {
+    const unreadCount = await Message.countDocuments({
+      receiver: req.user._id,
+      read: false,
+    });
+    res.json({
+      success: true,
+      data: { unreadCount },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ── GET /api/messages/:otherUserId ──────────────────────────────────────────
 // Get conversation between current user and another user
 router.get('/:otherUserId', async (req, res, next) => {
