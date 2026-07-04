@@ -61,14 +61,20 @@ export default function Register() {
 
     setLoading(true);
     try {
-      await authAPI.register({
+      const res = await authAPI.register({
         name: formData.name.trim(),
         phone: formData.phone.trim(),
         email: formData.email.trim(),
         password: formData.password,
       });
       
-      addToast('Code sent to your email!', 'success');
+      const fallbackOtp = res.data?.data?.fallbackOtp;
+
+      if (fallbackOtp) {
+        addToast(`[TESTING MODE] Your OTP is: ${fallbackOtp}`, 'warning');
+      } else {
+        addToast('Code sent to your email!', 'success');
+      }
       
       navigate('/verify-otp', { 
         state: { 

@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
+const PendingUser = require('../models/PendingUser');
 const { protect } = require('../middleware/auth');
 const { generateOTP, sendOTP, verifyOTP } = require('../services/otpService');
 
@@ -92,26 +93,33 @@ router.post(
       const otp = generateOTP();
       const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
-      const user = await User.create({
-        name,
-        phone,
-        password,
-        email,
-        otp: { code: otp, expiresAt: otpExpiresAt },
-      });
+      // Upsert PendingUser (in case they register again before 10 mins)
+      let pendingUser = await PendingUser.findOne({ email });
+      if (pendingUser) {
+        pendingUser.name = name;
+        pendingUser.phone = phone;
+        pendingUser.password = password;
+        pendingUser.otp = { code: otp, expiresAt: otpExpiresAt };
+        await pendingUser.save();
+      } else {
+        pendingUser = await PendingUser.create({
+          name,
+          phone,
+          password,
+          email,
+          otp: { code: otp, expiresAt: otpExpiresAt },
+        });
+      }
 
       // Send OTP via Email using Nodemailer
-      await sendOTP(email, otp);
-
-      // Strip password from response
-      const userObj = user.toObject();
-      delete userObj.password;
-      delete userObj.otp;
+      const emailResult = await sendOTP(email, otp);
 
       res.status(201).json({
         success: true,
-        message: 'Registration successful. Please verify your phone/email.',
-        data: { user: userObj },
+        message: 'OTP generated. Please verify your phone/email.',
+        data: { 
+          fallbackOtp: emailResult.success ? undefined : emailResult.fallbackOtp 
+        },
       });
     } catch (error) {
       next(error);
@@ -144,15 +152,15 @@ router.post(
 
       const { email, otp } = req.body;
 
-      const user = await User.findOne({ email }).select('+otp.code +otp.expiresAt');
-      if (!user) {
+      const pendingUser = await PendingUser.findOne({ email });
+      if (!pendingUser) {
         return res.status(404).json({
           success: false,
-          message: 'User not found',
+          message: 'OTP expired or user not found. Please register again.',
         });
       }
 
-      const isValid = verifyOTP(user.otp?.code, otp, user.otp?.expiresAt);
+      const isValid = verifyOTP(pendingUser.otp?.code, otp, pendingUser.otp?.expiresAt);
       if (!isValid) {
         return res.status(400).json({
           success: false,
@@ -160,10 +168,18 @@ router.post(
         });
       }
 
-      // Mark phone/email as verified and clear OTP
-      user.isPhoneVerified = true; // Still using this flag for overall verified status
-      user.otp = undefined;
-      await user.save({ validateModifiedOnly: true });
+      // OTP is valid! Create the real user account now.
+      const user = await User.create({
+        name: pendingUser.name,
+        phone: pendingUser.phone,
+        email: pendingUser.email,
+        password: pendingUser.password, // Pre-hashed by PendingUser schema? Wait, PendingUser doesn't hash it! 
+        // Let's pass the raw password because User.create will trigger the User schema's pre-save hash!
+        isPhoneVerified: true,
+      });
+
+      // Delete the pending user
+      await PendingUser.findByIdAndDelete(pendingUser._id);
 
       const accessToken = generateAccessToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
@@ -171,7 +187,6 @@ router.post(
 
       const userObj = user.toObject();
       delete userObj.password;
-      delete userObj.otp;
 
       res.json({
         success: true,

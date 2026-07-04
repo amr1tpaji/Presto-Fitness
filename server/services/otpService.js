@@ -38,14 +38,12 @@ const sendOTP = async (email, otp) => {
     });
 
     console.log(`\n📧 [EMAIL OTP SENT to ${email}]\n`);
-    return true;
+    return { success: true };
   } catch (error) {
     console.warn('⚠️ Nodemailer Error:', error.message);
     console.warn(`⚠️ Since email sending failed, here is the OTP: ${otp}`);
-    // DO NOT THROW AN ERROR! If we throw, the user gets stuck on the registration page.
-    // Instead, return true so the user is directed to the verification screen,
-    // where they can check these logs to manually enter the OTP.
-    return true;
+    // DO NOT THROW AN ERROR! Return the fallback OTP so dev mode can proceed
+    return { success: false, fallbackOtp: otp };
   }
 };
 
