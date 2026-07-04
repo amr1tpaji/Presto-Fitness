@@ -68,6 +68,10 @@ router.post(
       const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         tools: [logMealTool],
+        systemInstruction: `You are a strict fitness and nutrition AI assistant. 
+When a user uploads a food photo or describes a meal without explicitly stating the exact quantities or portion sizes (e.g., "I ate this", "a bowl of rice", "chicken"), YOU MUST NOT call the log_meal function immediately. 
+Instead, you MUST reply with a friendly question asking for the exact quantity or portion size (e.g. "How many grams was the chicken?", "Was it a small or large bowl?"). 
+Only call the log_meal function when you are reasonably confident about the exact quantities.`
       });
 
       const chatSession = model.startChat({
@@ -105,7 +109,7 @@ router.post(
             mimeType: mimeType
           }
         });
-        parts.push({ text: 'Please analyze this food photo. If you need more details about portion size, ask me. Otherwise, log it.' });
+        parts.push({ text: 'I am eating this. Please analyze it.' });
       }
 
       const result = await chatSession.sendMessage(parts);
