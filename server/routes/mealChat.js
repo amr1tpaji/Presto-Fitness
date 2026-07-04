@@ -93,26 +93,39 @@ Only call the log_meal function when you are reasonably confident about the exac
         let mimeType = req.file ? req.file.mimetype : 'image/jpeg';
         
         const targetPath = req.file ? req.file.path : req.body.existingPhoto;
-
         const fs = require('fs');
         const path = require('path');
-        let localFilePath = targetPath;
+        let fetchedBase64 = null;
         
-        // If it's a full URL to our server, extract just the filename
         if (targetPath.startsWith('http')) {
-          const parts = targetPath.split('/');
-          const filename = parts[parts.length - 1];
-          localFilePath = path.join(__dirname, '../uploads', filename);
-        } else if (!path.isAbsolute(targetPath)) {
-          // It's just a filename or relative path
-          localFilePath = path.join(__dirname, '../uploads', path.basename(targetPath));
+          try {
+            const imgResponse = await fetch(targetPath);
+            if (!imgResponse.ok) throw new Error(`HTTP ${imgResponse.status}`);
+            const buffer = await imgResponse.arrayBuffer();
+            fetchedBase64 = Buffer.from(buffer).toString('base64');
+          } catch (fetchErr) {
+            console.error('Fetch failed for image URL, falling back to local disk:', fetchErr);
+            const parts = targetPath.split('/');
+            const filename = parts[parts.length - 1];
+            const localFilePath = path.join(__dirname, '../uploads', filename);
+            try {
+              fetchedBase64 = fs.readFileSync(localFilePath, 'base64');
+            } catch (fsErr) {
+              throw new Error('Failed to read image from URL and local storage');
+            }
+          }
+        } else {
+          let localFilePath = path.isAbsolute(targetPath) 
+            ? targetPath 
+            : path.join(__dirname, '../uploads', path.basename(targetPath));
+          try {
+            fetchedBase64 = fs.readFileSync(localFilePath, 'base64');
+          } catch (fsErr) {
+            throw new Error('Failed to read image file from server storage');
+          }
         }
-
-        try {
-          imageBase64 = fs.readFileSync(localFilePath, 'base64');
-        } catch (fsErr) {
-          throw new Error('Failed to read image file from server storage');
-        }
+        
+        imageBase64 = fetchedBase64;
 
         parts.push({
           inlineData: {
