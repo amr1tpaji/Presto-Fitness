@@ -3,7 +3,7 @@ const { body, validationResult } = require('express-validator');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const MealLog = require('../models/MealLog');
 const { protect } = require('../middleware/auth');
-const { upload, getCloudinaryUrl } = require('../middleware/upload');
+const { upload } = require('../middleware/upload');
 
 const router = express.Router();
 router.use(protect);
@@ -59,7 +59,7 @@ router.post(
         history = [];
       }
       
-      const photoPath = req.file ? getCloudinaryUrl(req.file) : null;
+      const photoPath = req.file ? ((req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename) : null;
       
       if (!message && !photoPath) {
         return res.status(400).json({ success: false, message: 'Message or photo is required' });
@@ -84,14 +84,25 @@ router.post(
         parts.push({ text: message });
       }
 
-      if (photoPath) {
-        // We must fetch the image from Cloudinary to pass it to Gemini as inlineData
-        const imgResponse = await fetch(photoPath);
-        const buffer = await imgResponse.arrayBuffer();
+      if (req.file || req.body.existingPhoto) {
+        let imageBase64 = null;
+        let mimeType = req.file ? req.file.mimetype : 'image/jpeg';
+        
+        const targetPath = req.file ? req.file.path : req.body.existingPhoto;
+
+        if (targetPath.startsWith('http')) {
+          const imgResponse = await fetch(targetPath);
+          const buffer = await imgResponse.arrayBuffer();
+          imageBase64 = Buffer.from(buffer).toString('base64');
+        } else {
+          const fs = require('fs');
+          imageBase64 = fs.readFileSync(targetPath, 'base64');
+        }
+
         parts.push({
           inlineData: {
-            data: Buffer.from(buffer).toString('base64'),
-            mimeType: req.file.mimetype || 'image/jpeg'
+            data: imageBase64,
+            mimeType: mimeType
           }
         });
         parts.push({ text: 'Please analyze this food photo. If you need more details about portion size, ask me. Otherwise, log it.' });

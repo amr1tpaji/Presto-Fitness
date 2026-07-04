@@ -87,4 +87,4 @@ const uploadSingle = upload.single('file');
 /** Upload up to 5 files with field name 'files' */
 const uploadMultiple = upload.array('files', 5);
 
-module.exports = { uploadSingle, uploadMultiple };
+module.exports = { uploadSingle, uploadMultiple, upload };
