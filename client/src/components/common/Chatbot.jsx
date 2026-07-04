@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { chatAPI } from '../../services/api';
-import { Sparkles, X, Send, User, Bot, Loader2 } from 'lucide-react';
+import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle } from 'lucide-react';
 import { ToastContext } from '../../context/ToastContext';
 
 export default function Chatbot() {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'model', text: 'Hi! I am the Presto AI Fitness Coach. How can I help you crush your goals today?' }
@@ -58,13 +60,26 @@ export default function Chatbot() {
   return (
     <>
       {!isOpen && (
-        <button
-          className="chatbot-fab"
-          onClick={() => setIsOpen(true)}
-          title="Ask AI Coach"
-        >
-          <Sparkles size={24} />
-        </button>
+        <>
+          <button
+            className="chatbot-fab"
+            onClick={() => setIsOpen(true)}
+            title="Ask AI Coach"
+          >
+            <Sparkles size={24} />
+          </button>
+          <button
+            className="chatbot-fab"
+            onClick={() => navigate('/messages')}
+            title="Chat with Trainer"
+            style={{
+              bottom: '90px',
+              background: 'var(--warning, #f59e0b)'
+            }}
+          >
+            <MessageCircle size={24} />
+          </button>
+        </>
       )}
 
       {isOpen && (

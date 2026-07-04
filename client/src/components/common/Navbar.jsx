@@ -35,8 +35,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="flex" style={{ alignItems: 'center', gap: '12px' }}>
-        <Link to={isAdmin ? '/admin/dashboard' : '/home'} className="navbar-brand">
-          <div className="navbar-logo">P</div>
+        <Link to={isAdmin ? '/admin/dashboard' : '/home'} className="navbar-brand" style={{ marginLeft: 50 }}>
           <span className="navbar-brand-name">
             Presto <span>Fitness</span>
           </span>

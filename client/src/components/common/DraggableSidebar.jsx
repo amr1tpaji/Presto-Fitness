@@ -75,72 +75,29 @@ export default function DraggableSidebar() {
     );
   }
 
-  // Unified Pointer Logic (Mouse + Touch)
-  const handlePointerDown = (e) => {
-    e.target.setPointerCapture(e.pointerId);
-    startPos.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      offsetX: e.clientX - position.x,
-      offsetY: e.clientY - position.y
-    };
-    setIsDragging(false);
-  };
-
-  const handlePointerMove = (e) => {
-    if (!startPos.current.startX) return; // not pressed
-    const dx = Math.abs(e.clientX - startPos.current.startX);
-    const dy = Math.abs(e.clientY - startPos.current.startY);
-    if (dx > 5 || dy > 5) {
-      setIsDragging(true);
-    }
-
-    if (isDragging || dx > 5 || dy > 5) {
-      let newX = e.clientX - startPos.current.offsetX;
-      let newY = e.clientY - startPos.current.offsetY;
-      newX = Math.max(0, Math.min(newX, window.innerWidth - 56));
-      newY = Math.max(0, Math.min(newY, window.innerHeight - 56));
-      setPosition({ x: newX, y: newY });
-    }
-  };
-
-  const handlePointerUp = (e) => {
-    e.target.releasePointerCapture(e.pointerId);
-    startPos.current = { startX: 0, startY: 0, offsetX: 0, offsetY: 0 };
-    
-    // Give it a tiny tick before clearing isDragging so onClick can check it
-    setTimeout(() => {
-      setIsDragging(false);
-    }, 100);
-  };
-
-  return (
-    <>
-      {/* Floating Action Button */}
-      <div 
+      {/* Fixed Menu Button at Top Left */}
+      <button 
         className="draggable-fab"
         style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
+          left: '16px',
+          top: '16px',
           position: 'fixed',
           zIndex: 9999,
-          touchAction: 'none'
+          border: 'none',
+          background: 'var(--accent)',
+          color: '#000',
+          width: 40,
+          height: 40,
+          borderRadius: 8,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer'
         }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        onClick={(e) => {
-          if (!isDragging) {
-            setIsOpen(!isOpen);
-          } else {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }}
+        onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
-      </div>
+      </button>
 
       {/* Floating Menu Popup */}
       {isOpen && (
@@ -150,8 +107,8 @@ export default function DraggableSidebar() {
             className="draggable-menu"
             style={{
               position: 'fixed',
-              left: `${Math.min(position.x, window.innerWidth - 220)}px`,
-              top: `${Math.min(position.y - 280, window.innerHeight - 300)}px`,
+              left: '16px',
+              top: '64px',
               zIndex: 9998
             }}
           >
