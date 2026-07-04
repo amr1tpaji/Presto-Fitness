@@ -5,10 +5,19 @@ const path = require("path");
 // Go to Firebase Console -> Project Settings -> Service Accounts -> Generate new private key
 // Save the file as 'firebaseServiceAccount.json' in this 'config' directory.
 let serviceAccount;
-try {
-  serviceAccount = require("./firebaseServiceAccount.json");
-} catch (error) {
-  console.warn("⚠️ Warning: firebaseServiceAccount.json not found. Firebase Admin is not initialized.");
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (error) {
+    console.error("⚠️ Error parsing FIREBASE_SERVICE_ACCOUNT from environment variables.");
+  }
+} else {
+  try {
+    serviceAccount = require("./firebaseServiceAccount.json");
+  } catch (error) {
+    console.warn("⚠️ Warning: firebaseServiceAccount.json not found. Firebase Admin is not initialized.");
+  }
 }
 
 if (serviceAccount) {
