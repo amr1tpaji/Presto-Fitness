@@ -29,7 +29,3 @@ services:
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/server/uploads
-      sizeGB: 1
