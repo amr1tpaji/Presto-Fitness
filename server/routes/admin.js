@@ -132,4 +132,49 @@ router.get('/dashboard/stats', async (req, res, next) => {
   }
 });
 
+// ── DELETE /api/admin/clients/:id ───────────────────────────────────────────
+// Permanently delete a client and all their associated data
+router.delete('/clients/:id', async (req, res, next) => {
+  try {
+    const clientId = req.params.id;
+
+    // Check if client exists
+    const client = await User.findById(clientId);
+    if (!client || client.role !== 'client') {
+      return res.status(404).json({
+        success: false,
+        message: 'Client not found',
+      });
+    }
+
+    // Dynamic import to avoid missing models at the top
+    const DailyTask = require('../models/DailyTask');
+    const LabReport = require('../models/LabReport');
+    const MealLog = require('../models/MealLog');
+    const Reward = require('../models/Reward');
+
+    // Cascade Delete all user data
+    await Promise.all([
+      WeightLog.deleteMany({ userId: clientId }),
+      Workout.deleteMany({ assignedTo: clientId }),
+      DietPlan.deleteMany({ assignedTo: clientId }),
+      Payment.deleteMany({ userId: clientId }),
+      DailyTask.deleteMany({ assignedTo: clientId }),
+      LabReport.deleteMany({ userId: clientId }),
+      MealLog.deleteMany({ userId: clientId }),
+      Reward.deleteMany({ userId: clientId }),
+    ]);
+
+    // Finally delete the user
+    await User.findByIdAndDelete(clientId);
+
+    res.json({
+      success: true,
+      message: 'Client and all associated data permanently deleted.',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

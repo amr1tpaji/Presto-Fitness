@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { adminAPI } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import WorkoutBuilder from '../../components/admin/WorkoutBuilder';
@@ -14,7 +14,7 @@ import Loader from '../../components/common/Loader';
 import {
   ArrowLeft, User, Phone, Crown, Flame, Star,
   Activity, Dumbbell, UtensilsCrossed, FlaskConical,
-  ListChecks, CreditCard, CheckCircle2, XCircle,
+  ListChecks, CreditCard, CheckCircle2, XCircle, Trash2,
 } from 'lucide-react';
 
 const TABS = [
@@ -35,6 +35,7 @@ export default function ClientDetail() {
   const [activeTab, setActiveTab] = useState('overview');
   const [labReports, setLabReports] = useState([]);
   const [payments, setPayments] = useState([]);
+  const navigate = useNavigate();
 
   const fetchClient = useCallback(async () => {
     try {
@@ -66,6 +67,18 @@ export default function ClientDetail() {
     addToast('Lab report uploaded successfully', 'success');
   };
 
+  const handleDelete = async () => {
+    if (window.confirm(`Are you sure you want to completely delete ${client.name}'s account and ALL their data? This cannot be undone.`)) {
+      try {
+        await adminAPI.deleteClient(id);
+        addToast('Client successfully deleted.', 'success');
+        navigate('/admin/clients');
+      } catch (err) {
+        addToast(err.response?.data?.message || 'Failed to delete client', 'error');
+      }
+    }
+  };
+
   if (loading) return <div className="page"><Loader /></div>;
 
   if (!client) {
@@ -86,10 +99,13 @@ export default function ClientDetail() {
 
   return (
     <div className="page">
-      <div className="page-header">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link to="/admin/clients" className="btn btn-ghost btn-sm" style={{ textDecoration: 'none', marginBottom: '0.5rem' }}>
           <ArrowLeft size={16} /> Back to Clients
         </Link>
+        <button className="btn btn-sm" onClick={handleDelete} style={{ background: 'var(--danger, #ef4444)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Trash2 size={16} /> Delete Account
+        </button>
       </div>
 
       <div className="card" style={{ marginBottom: '1.5rem' }}>

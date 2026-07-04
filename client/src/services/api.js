@@ -90,6 +90,7 @@ export const authAPI = {
 export const adminAPI = {
   getClients: (params) => API.get('/admin/clients', { params }),
   getClient: (id) => API.get(`/admin/clients/${id}`),
+  deleteClient: (id) => API.delete(`/admin/clients/${id}`),
   getDashboardStats: () => API.get('/admin/dashboard/stats'),
 };
 
