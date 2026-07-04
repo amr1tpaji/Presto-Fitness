@@ -95,12 +95,21 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ── 404 Handler ─────────────────────────────────────────────────────────────
-app.use((req, res) => {
+// ── Static Files (React Frontend) ───────────────────────────────────────────
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// ── 404 Handler for API routes ──────────────────────────────────────────────
+app.use('/api/*', (req, res) => {
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.originalUrl}`,
   });
+});
+
+// ── Catch-All Route (Serve React App) ───────────────────────────────────────
+// Any request that isn't caught by API or static files will be served the React index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // ── Global Error Handler ────────────────────────────────────────────────────
