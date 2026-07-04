@@ -231,7 +231,6 @@ export default function MyProgress() {
             )}
           </div>
         </div>
-      </div>
 
       <div className="card">
         <div className="card-header">
