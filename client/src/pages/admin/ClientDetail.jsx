@@ -153,13 +153,13 @@ export default function ClientDetail() {
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Flame size={20} style={{ color: 'var(--warning, #f59e0b)' }} /> {client.streak || 0}
+                  <Flame size={20} style={{ color: 'var(--warning, #f59e0b)' }} /> {client.rewards?.streak || 0}
                 </div>
                 <span className="text-muted" style={{ fontSize: '0.75rem' }}>Day Streak</span>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Star size={20} style={{ color: 'var(--accent)' }} /> {client.points || 0}
+                  <Star size={20} style={{ color: 'var(--accent)' }} /> {client.rewards?.points || 0}
                 </div>
                 <span className="text-muted" style={{ fontSize: '0.75rem' }}>Points</span>
               </div>

@@ -173,9 +173,12 @@ export default function Dashboard() {
                         </Badge>
                       </td>
                       <td>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          🔥 {client.streak || 0}
-                        </span>
+                        <div className="flex gap-sm text-muted" style={{ fontSize: '0.8rem', marginTop: 4 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Flame size={12} style={{ color: 'var(--warning, #f59e0b)' }} /> 
+                            {client.rewards?.streak || 0}
+                          </span>
+                        </div>
                       </td>
                     </tr>
                   ))}
