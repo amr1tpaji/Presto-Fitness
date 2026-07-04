@@ -510,3 +510,40 @@
     max-width: 100%;
   }
 }
+
+/* ===== Draggable Sidebar ===== */
+.draggable-fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #06080d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.draggable-fab:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.draggable-menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 9997;
+}
+
+.draggable-menu {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  width: 200px;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn 0.2s ease;
+}

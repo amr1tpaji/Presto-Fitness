@@ -2,7 +2,7 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import Navbar from './components/common/Navbar';
-import Sidebar from './components/common/Sidebar';
+import DraggableSidebar from './components/common/DraggableSidebar';
 import Loader from './components/common/Loader';
 import Toast from './components/common/Toast';
 
@@ -47,11 +47,10 @@ function AdminRoute() {
 }
 
 function AdminLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div className="admin-layout">
-      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Navbar />
+      <DraggableSidebar />
       <main className="admin-main">
         <Outlet />
       </main>
@@ -60,11 +59,10 @@ function AdminLayout() {
 }
 
 function ClientLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <div className="client-layout">
-      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Navbar />
+      <DraggableSidebar />
       <main className="client-main">
         <Outlet />
       </main>

@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { ChevronDown, User, Settings, LogOut, Menu, X } from 'lucide-react';
 import { APP_NAME } from '../../utils/constants';
 
-export default function Navbar({ onToggleSidebar, sidebarOpen }) {
+export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -33,9 +33,6 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
   return (
     <nav className="navbar">
       <div className="flex" style={{ alignItems: 'center', gap: '12px' }}>
-        <button className="navbar-hamburger" onClick={onToggleSidebar} aria-label="Toggle menu">
-          {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
         <Link to={isAdmin ? '/admin/dashboard' : '/home'} className="navbar-brand">
           <div className="navbar-logo">P</div>
           <span className="navbar-brand-name">
