@@ -320,7 +320,7 @@ router.put('/profile', protect, (req, res, next) => {
       if (goalWeight) updateData.goalWeight = Number(goalWeight);
       
       if (req.file) {
-        updateData.avatar = req.file.filename;
+        updateData.avatar = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename;
       }
 
       const updatedUser = await User.findByIdAndUpdate(

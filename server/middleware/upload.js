@@ -1,23 +1,20 @@
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const fs = require('fs');
 
-/**
- * Multer disk storage configuration.
- * Files are stored in the `uploads/` directory with unique filenames
- * generated via crypto to prevent collisions and obscure original names.
- */
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '..', 'uploads'));
-  },
-  filename: (req, file, cb) => {
-    // Generate a unique filename: <randomHex>-<timestamp>.<ext>
-    const uniqueSuffix = crypto.randomBytes(12).toString('hex');
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${uniqueSuffix}-${Date.now()}${ext}`);
-  },
-});
+// Configure Cloudinary if keys are provided
+const useCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+
+if (useCloudinary) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+}
 
 /**
  * File filter — only allow images (jpg, jpeg, png) and PDFs.
@@ -41,6 +38,40 @@ const fileFilter = (req, file, cb) => {
     );
   }
 };
+
+let storage;
+
+if (useCloudinary) {
+  storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+      // PDF needs 'raw' resource type in Cloudinary, images use 'image'
+      const isPdf = file.mimetype === 'application/pdf';
+      return {
+        folder: 'presto-fitness',
+        format: isPdf ? 'pdf' : undefined,
+        resource_type: isPdf ? 'raw' : 'image',
+      };
+    },
+  });
+} else {
+  // Ensure uploads directory exists
+  const uploadsDir = path.join(__dirname, '..', 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+  }
+  
+  storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadsDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = crypto.randomBytes(12).toString('hex');
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `${uniqueSuffix}-${Date.now()}${ext}`);
+    },
+  });
+}
 
 const upload = multer({
   storage,

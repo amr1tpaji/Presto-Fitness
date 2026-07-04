@@ -33,7 +33,7 @@ router.post('/', (req, res, next) => {
         userId: req.user._id,
         mealType: req.body.mealType || 'Snack', // Default if missing
         items: items,
-        photo: req.file ? req.file.filename : undefined,
+        photo: req.file ? ((req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename) : undefined,
         comment: req.body.comment,
         isOnPlan: req.body.isOnPlan === 'true' || req.body.isOnPlan === true,
         date: req.body.date || Date.now(),

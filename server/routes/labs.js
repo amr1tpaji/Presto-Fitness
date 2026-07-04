@@ -62,7 +62,7 @@ router.post('/', (req, res, next) => {
         userId,
         title,
         date: new Date(date),
-        fileUrl: req.file ? req.file.filename : undefined,
+        fileUrl: req.file ? ((req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename) : undefined,
         biomarkers: evaluatedBiomarkers,
         overallStatus,
         uploadedBy: req.user._id,
