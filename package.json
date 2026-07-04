@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "cd server && npm install",
     "build": "cd server && npm install",
-    "start": "cd server && npm start"
+    "start": "cd server && npm start",
+    "dev": "cd server && npm start"
   }
 }
