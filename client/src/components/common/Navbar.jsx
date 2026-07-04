@@ -4,6 +4,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { ChevronDown, User, Settings, LogOut, Menu, X } from 'lucide-react';
 import { APP_NAME } from '../../utils/constants';
 
+import { getImageUrl } from '../../services/api';
+
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -59,7 +61,7 @@ export default function Navbar() {
             >
               {user?.avatar ? (
                 <img 
-                  src={`/uploads/${user.avatar}`} 
+                  src={getImageUrl(user.avatar)} 
                   alt="Avatar" 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />

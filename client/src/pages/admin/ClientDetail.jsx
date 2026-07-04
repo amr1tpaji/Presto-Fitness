@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { adminAPI } from '../../services/api';
+import { adminAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import WorkoutBuilder from '../../components/admin/WorkoutBuilder';
 import DietPlanBuilder from '../../components/admin/DietPlanBuilder';
@@ -128,7 +128,7 @@ export default function ClientDetail() {
             >
               {client.avatar ? (
                 <img 
-                  src={`/uploads/${client.avatar}`} 
+                  src={getImageUrl(client.avatar)} 
                   alt="Avatar" 
                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
                 />

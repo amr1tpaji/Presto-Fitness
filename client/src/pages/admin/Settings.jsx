@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { ToastContext } from '../../context/ToastContext';
-import { authAPI } from '../../services/api';
+import { authAPI, getImageUrl } from '../../services/api';
 import { User, Mail, Phone, Lock, Save, Settings as SettingsIcon, Camera } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
@@ -22,7 +22,7 @@ export default function Settings() {
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(
-    user?.avatar ? `/uploads/${user.avatar}` : ''
+    user?.avatar ? getImageUrl(user.avatar) : ''
   );
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);

@@ -170,4 +170,17 @@ export const chatAPI = {
   sendMessage: (data) => API.post('/chat', data),
 };
 
+// ===== Helper =====
+export const getImageUrl = (filename) => {
+  if (!filename) return '';
+  if (filename.startsWith('http')) return filename;
+  
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl) {
+    const baseUrl = apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}/uploads/${filename}`;
+  }
+  return `/uploads/${filename}`;
+};
+
 export default API;

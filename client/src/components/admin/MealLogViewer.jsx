@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
-import { mealsAPI } from '../../services/api';
+import { mealsAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import Loader from '../common/Loader';
 import { UtensilsCrossed, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
@@ -55,12 +55,14 @@ export default function MealLogViewer({ clientId }) {
         let totalCarbs = 0;
         let totalFats = 0;
 
-        log.items.forEach(item => {
-          totalCalories += item.calories || 0;
-          totalProtein += item.protein || 0;
-          totalCarbs += item.carbs || 0;
-          totalFats += item.fats || 0;
-        });
+        if (log.items && Array.isArray(log.items)) {
+          log.items.forEach(item => {
+            totalCalories += item.calories || 0;
+            totalProtein += item.protein || 0;
+            totalCarbs += item.carbs || 0;
+            totalFats += item.fats || 0;
+          });
+        }
 
         return (
           <div key={log._id || idx} className="card" style={{ transition: 'all 0.2s ease' }}>
@@ -78,7 +80,7 @@ export default function MealLogViewer({ clientId }) {
                   <UtensilsCrossed size={20} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{log.mealType}</h3>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{log.mealType || 'Meal'}</h3>
                   <div className="text-muted flex gap-sm" style={{ fontSize: '0.85rem', alignItems: 'center', marginTop: 4 }}>
                     <Calendar size={14} /> 
                     {new Date(log.date || log.createdAt).toLocaleDateString('en-IN', {
@@ -106,7 +108,7 @@ export default function MealLogViewer({ clientId }) {
                   <div>
                     <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)' }}>Food Items</h4>
                     <div className="flex-col gap-sm">
-                      {log.items.map((item, i) => (
+                      {log.items && log.items.length > 0 ? log.items.map((item, i) => (
                         <div key={i} className="flex flex-between" style={{ padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
                           <div>
                             <div style={{ fontWeight: 600 }}>{item.food}</div>
@@ -119,7 +121,9 @@ export default function MealLogViewer({ clientId }) {
                             </div>
                           </div>
                         </div>
-                      ))}
+                      )) : (
+                        <div className="text-muted" style={{ fontSize: '0.9rem' }}>No specific items logged.</div>
+                      )}
                     </div>
                   </div>
 
@@ -129,7 +133,7 @@ export default function MealLogViewer({ clientId }) {
                       <div>
                         <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}>Attached Photo</h4>
                         <img 
-                          src={`/uploads/${log.photo}`} 
+                          src={getImageUrl(log.photo)} 
                           alt="Meal" 
                           style={{ width: '100%', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
                         />
