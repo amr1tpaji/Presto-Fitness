@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { chatAPI } from '../../services/api';
 import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle } from 'lucide-react';
 import { ToastContext } from '../../context/ToastContext';
 
 export default function Chatbot() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'model', text: 'Hi! I am the Presto AI Fitness Coach. How can I help you crush your goals today?' }
@@ -70,7 +71,13 @@ export default function Chatbot() {
           </button>
           <button
             className="chatbot-fab"
-            onClick={() => navigate('/messages')}
+            onClick={() => {
+              if (location.pathname === '/messages') {
+                navigate('/home');
+              } else {
+                navigate('/messages');
+              }
+            }}
             title="Chat with Trainer"
             style={{
               bottom: '90px',

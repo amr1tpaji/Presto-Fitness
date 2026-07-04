@@ -163,7 +163,7 @@ export default function LogMeal() {
                 }}>
                   {msg.photo && (
                     <div style={{ marginBottom: '0.5rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-                      <img src={msg.photo} alt="Upload preview" style={{ maxWidth: '100%', maxHeight: 200, objectFit: 'cover' }} />
+                      <img src={msg.photo} alt="Upload preview" style={{ maxWidth: 150, maxHeight: 150, objectFit: 'cover' }} />
                     </div>
                   )}
                   <p style={{ margin: 0, lineHeight: 1.5 }}>{msg.text}</p>
