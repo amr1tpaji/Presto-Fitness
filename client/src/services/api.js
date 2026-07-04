@@ -120,6 +120,7 @@ export const weightAPI = {
   log: (data) => API.post('/weight', data),
   getHistory: () => API.get('/weight/history'),
   getClientHistory: (clientId) => API.get(`/weight/client/${clientId}`),
+  updateGoalWeight: (data) => API.put('/weight/goal', data),
 };
 
 // ===== Labs API =====
@@ -168,6 +169,20 @@ export const paymentsAPI = {
 // ===== Chat API =====
 export const chatAPI = {
   sendMessage: (data) => API.post('/chat', data),
+};
+
+// ===== Messages API =====
+export const messagesAPI = {
+  getTrainers: () => API.get('/messages/admin/trainers'),
+  getConversation: (userId, params) => API.get(`/messages/${userId}`, { params }),
+  sendMessage: (data) => API.post('/messages', data),
+};
+
+// ===== Meal Chat API =====
+export const mealChatAPI = {
+  sendMessage: (formData) => API.post('/meal-chat', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 };
 
 // ===== Helper =====

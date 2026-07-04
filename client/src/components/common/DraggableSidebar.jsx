@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   LayoutDashboard, Users, Dumbbell, UtensilsCrossed,
-  FlaskConical, CreditCard, Settings, Home, TrendingUp, Trophy, User as UserIcon, X, Menu
+  FlaskConical, CreditCard, Settings, Home, TrendingUp, Trophy, User as UserIcon, X, Menu, MessageCircle
 } from 'lucide-react';
 
 const adminItems = [
@@ -18,6 +18,7 @@ const adminItems = [
 
 const clientItems = [
   { to: '/home', icon: Home, label: 'Home' },
+  { to: '/messages', icon: MessageCircle, label: 'Messages' },
   { to: '/workout', icon: Dumbbell, label: 'My Workout' },
   { to: '/diet', icon: UtensilsCrossed, label: 'My Diet' },
   { to: '/progress', icon: TrendingUp, label: 'Progress' },

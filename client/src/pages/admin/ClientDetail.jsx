@@ -11,14 +11,16 @@ import WeightChart from '../../components/admin/WeightChart';
 import MealLogViewer from '../../components/admin/MealLogViewer';
 import Badge from '../../components/common/Badge';
 import Loader from '../../components/common/Loader';
+import ChatUI from '../../components/common/ChatUI';
 import {
   ArrowLeft, User, Phone, Crown, Flame, Star,
   Activity, Dumbbell, UtensilsCrossed, FlaskConical,
-  ListChecks, CreditCard, CheckCircle2, XCircle, Trash2,
+  ListChecks, CreditCard, CheckCircle2, XCircle, Trash2, MessageCircle
 } from 'lucide-react';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: <Activity size={16} /> },
+  { key: 'chat', label: 'Chat', icon: <MessageCircle size={16} /> },
   { key: 'workout', label: 'Workout', icon: <Dumbbell size={16} /> },
   { key: 'diet', label: 'Diet', icon: <UtensilsCrossed size={16} /> },
   { key: 'meals', label: 'Meals', icon: <UtensilsCrossed size={16} /> },
@@ -47,6 +49,8 @@ export default function ClientDetail() {
           weightLog: payload.recentWeightLogs || [],
           workout: payload.currentWorkout,
           dietPlan: payload.currentDiet,
+          recentTasks: payload.recentTasks || [],
+          completionRate: payload.completionRate || 0,
         });
       }
       setLabReports(payload?.labReports || payload?.client?.labReports || []);
@@ -93,9 +97,8 @@ export default function ClientDetail() {
     );
   }
 
-  const recentTasks = client.tasks || [];
-  const completedTasks = recentTasks.filter((t) => t.completed);
-  const completionRate = recentTasks.length > 0 ? Math.round((completedTasks.length / recentTasks.length) * 100) : 0;
+  const recentTasks = client.recentTasks || [];
+  const completionRate = client.completionRate || 0;
 
   return (
     <div className="page">
@@ -257,6 +260,12 @@ export default function ClientDetail() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'chat' && (
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          <ChatUI otherUser={client} />
         </div>
       )}
 

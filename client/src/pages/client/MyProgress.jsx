@@ -138,6 +138,56 @@ export default function MyProgress() {
         <div className="card">
           <div className="card-header">
             <h3 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Scale size={18} /> Set Goal Weight
+            </h3>
+          </div>
+          <div className="card-body">
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const w = parseFloat(e.target.goalWeight.value);
+              if (!w || w < 20 || w > 300) {
+                addToast('Please enter a valid weight (20-300 kg)', 'error');
+                return;
+              }
+              const btn = e.target.querySelector('button');
+              btn.disabled = true;
+              btn.textContent = 'Saving...';
+              try {
+                await weightAPI.updateGoalWeight({ goalWeight: w });
+                addToast('Goal weight updated successfully!', 'success');
+                // The main layout fetches user on mount, but we can fake an update if we want, or rely on hard refresh
+                if (window.location) window.location.reload();
+              } catch (err) {
+                addToast(err.response?.data?.message || 'Failed to update goal weight', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Set Goal Weight';
+              }
+            }}>
+              <div className="flex-col gap-md">
+                <Input
+                  name="goalWeight"
+                  label="Goal Weight (kg)"
+                  type="number"
+                  step="0.1"
+                  min="20"
+                  max="300"
+                  placeholder="e.g. 65.0"
+                  defaultValue={user?.goalWeight || ''}
+                  icon={<Scale size={18} />}
+                  required
+                />
+                <Button type="submit" variant="primary" icon={<Plus size={18} />}>
+                  Set Goal Weight
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: '2rem' }}>
+          <div className="card-header">
+            <h3 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Calendar size={18} /> Weight History
             </h3>
           </div>

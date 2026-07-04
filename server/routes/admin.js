@@ -30,7 +30,7 @@ router.get('/clients', async (req, res, next) => {
 
     const [clients, total] = await Promise.all([
       User.find(filter)
-        .select('name phone email avatar gender currentWeight subscription rewards.streak isPhoneVerified activationKey')
+        .select('name phone email avatar gender currentWeight subscription rewards.streak rewards.points isPhoneVerified activationKey')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit)),
@@ -66,7 +66,8 @@ router.get('/clients/:id', async (req, res, next) => {
     }
 
     // Fetch associated data in parallel
-    const [recentWeightLogs, currentWorkout, currentDiet] = await Promise.all([
+    const DailyTask = require('../models/DailyTask');
+    const [recentWeightLogs, currentWorkout, currentDiet, recentTasksRecord] = await Promise.all([
       WeightLog.find({ userId: client._id })
         .sort({ date: -1 })
         .limit(10),
@@ -78,6 +79,9 @@ router.get('/clients/:id', async (req, res, next) => {
         assignedTo: client._id,
         isActive: true,
       }).sort({ createdAt: -1 }),
+      DailyTask.findOne({
+        userId: client._id,
+      }).sort({ date: -1 }),
     ]);
 
     res.json({
@@ -87,6 +91,10 @@ router.get('/clients/:id', async (req, res, next) => {
         recentWeightLogs,
         currentWorkout,
         currentDiet,
+        recentTasks: recentTasksRecord ? recentTasksRecord.tasks : [],
+        completionRate: recentTasksRecord && recentTasksRecord.tasks.length > 0
+          ? Math.round((recentTasksRecord.tasks.filter(t => t.isCompleted).length / recentTasksRecord.tasks.length) * 100)
+          : 0,
       },
     });
   } catch (error) {

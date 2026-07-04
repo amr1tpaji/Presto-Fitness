@@ -29,6 +29,7 @@ import LogMeal from './pages/client/LogMeal';
 import MyProgress from './pages/client/MyProgress';
 import MyRewards from './pages/client/MyRewards';
 import Profile from './pages/client/Profile';
+import Messages from './pages/client/Messages';
 
 // Client bottom tab bar
 import { Home, Dumbbell, UtensilsCrossed, TrendingUp, Trophy } from 'lucide-react';
@@ -120,6 +121,7 @@ export default function App() {
             <Route path="/progress" element={<MyProgress />} />
             <Route path="/rewards" element={<MyRewards />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/messages" element={<Messages />} />
           </Route>
         </Route>
 

@@ -90,6 +90,40 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// ── PUT /api/weight/goal ────────────────────────────────────────────────────
+// Update the user's goal weight
+router.put(
+  '/goal',
+  [
+    body('goalWeight')
+      .isFloat({ min: 20, max: 500 })
+      .withMessage('Goal weight must be between 20 and 500'),
+  ],
+  async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array(),
+        });
+      }
+
+      await User.findByIdAndUpdate(req.user._id, {
+        goalWeight: req.body.goalWeight,
+      });
+
+      res.json({
+        success: true,
+        message: 'Goal weight updated successfully',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // ── GET /api/weight/client/:clientId ────────────────────────────────────────
 // Admin: get a client's weight history
 router.get('/client/:clientId', adminOnly, async (req, res, next) => {
