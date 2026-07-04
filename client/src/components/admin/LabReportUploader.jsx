@@ -142,7 +142,7 @@ export default function LabReportUploader({ clientId, onUpload }) {
           Expand categories and enter the values from the lab report
         </p>
 
-        {Object.entries(BIOMARKER_CATEGORIES).map(([category, tests]) => (
+        {BIOMARKER_CATEGORIES.map(({ category, biomarkers: tests }) => (
           <div key={category} className="card" style={{ marginBottom: '8px', background: 'var(--bg-secondary)' }}>
             <button
               type="button" className="card-header" style={{ width: '100%', cursor: 'pointer', background: 'none', border: 'none', color: 'inherit' }}
@@ -172,7 +172,7 @@ export default function LabReportUploader({ clientId, onUpload }) {
                       )}
                       <span className="text-muted" style={{ fontSize: '0.75rem', minWidth: '60px' }}>{test.unit}</span>
                       <span className="text-muted" style={{ fontSize: '0.7rem', minWidth: '80px' }}>
-                        {test.range?.min}–{test.range?.max}
+                        {test.min}–{test.max}
                       </span>
                     </div>
                   );

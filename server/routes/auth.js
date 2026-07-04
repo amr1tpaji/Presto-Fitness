@@ -103,10 +103,6 @@ router.post(
       // Send OTP via Email using Nodemailer
       await sendOTP(email, otp);
 
-      const accessToken = generateAccessToken(user._id);
-      const refreshToken = generateRefreshToken(user._id);
-      setRefreshCookie(res, refreshToken);
-
       // Strip password from response
       const userObj = user.toObject();
       delete userObj.password;
@@ -114,8 +110,8 @@ router.post(
 
       res.status(201).json({
         success: true,
-        message: 'Registration successful. Please verify your phone.',
-        data: { user: userObj, accessToken },
+        message: 'Registration successful. Please verify your phone/email.',
+        data: { user: userObj },
       });
     } catch (error) {
       next(error);

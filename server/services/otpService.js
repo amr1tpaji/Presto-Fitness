@@ -14,7 +14,7 @@ const sendOTP = async (email, otp) => {
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS.replace(/"/g, ''), // Removing quotes if any
+        pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/"/g, '') : '', // Removing quotes if any
       },
     });
 

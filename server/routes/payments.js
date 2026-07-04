@@ -139,7 +139,7 @@ router.post('/verify', async (req, res, next) => {
       'half-yearly': 180,
       yearly: 365,
     };
-    const durationDays = planDurations[plan] || 30;
+    const durationDays = planDurations[plan || payment.plan] || 30;
 
     const startDate = new Date();
     const endDate = new Date();

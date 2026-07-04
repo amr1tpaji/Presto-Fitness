@@ -99,8 +99,7 @@ const buildContext = async (userId) => {
   // Count completed workout-type tasks
   const completedWorkoutTasks = await DailyTask.countDocuments({
     userId,
-    'tasks.type': 'workout',
-    'tasks.isCompleted': true,
+    tasks: { $elemMatch: { type: 'workout', isCompleted: true } },
   });
 
   // Count logged meals
@@ -118,15 +117,8 @@ const buildContext = async (userId) => {
   // Check if weight goal is reached
   let weightGoalReached = false;
   if (user.goalWeight && user.currentWeight) {
-    // Goal reached if current weight is at or past the goal
-    // Supports both cutting (goal < current) and bulking (goal > current)
-    if (user.goalWeight <= user.currentWeight) {
-      // Cutting goal
-      weightGoalReached = user.currentWeight <= user.goalWeight;
-    } else {
-      // Bulking goal
-      weightGoalReached = user.currentWeight >= user.goalWeight;
-    }
+    // Goal reached if current weight is within 0.5 units of the goal
+    weightGoalReached = Math.abs(user.currentWeight - user.goalWeight) <= 0.5;
   }
 
   return {

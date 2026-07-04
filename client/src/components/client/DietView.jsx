@@ -24,7 +24,7 @@ export default function DietView({ dietPlan }) {
     if (!dietPlan.meals || !Array.isArray(dietPlan.meals)) return grouped;
 
     dietPlan.meals.forEach((meal) => {
-      const mType = meal.type || meal.mealType || 'Snack';
+      const mType = meal.name || meal.type || meal.mealType || 'Snack';
       const matched = Object.keys(grouped).find(
         (k) => k.toLowerCase() === mType.toLowerCase()
       ) || 'Snack';

@@ -31,7 +31,7 @@ const rewardSchema = new mongoose.Schema(
       default: Date.now,
     },
     criteria: {
-      type: {
+      criteriaType: {
         type: String, // e.g. "streak", "meals_logged", "workouts_completed"
       },
       threshold: Number, // e.g. 7 (for 7-day streak)

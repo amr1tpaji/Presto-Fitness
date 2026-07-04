@@ -22,7 +22,7 @@ export default function MyProgress() {
   const fetchData = useCallback(async () => {
     try {
       const [weightRes, labRes] = await Promise.all([
-        weightAPI.getAll(),
+        weightAPI.getHistory(),
         labsAPI.getAll(),
       ]);
       setWeightLog(weightRes.data?.data?.weightLogs || []);

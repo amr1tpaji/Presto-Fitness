@@ -19,7 +19,7 @@ export default function ProgressTracker() {
 
   const fetchWeights = useCallback(async () => {
     try {
-      const res = await weightAPI.getAll();
+      const res = await weightAPI.getHistory();
       setWeightLog(res.data?.weights || res.data || []);
     } catch (err) {
       addToast('Failed to load weight history', 'error');

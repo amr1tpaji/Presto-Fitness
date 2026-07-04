@@ -74,6 +74,37 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// ── GET /api/workouts/client/:clientId ──────────────────────────────────────
+// Get workouts assigned to a specific client
+router.get('/client/:clientId', async (req, res, next) => {
+  try {
+    // Only admin or the client themselves can access
+    if (
+      req.user.role !== 'admin' &&
+      req.user._id.toString() !== req.params.clientId
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized',
+      });
+    }
+
+    const workouts = await Workout.find({
+      assignedTo: req.params.clientId,
+      isActive: true,
+    })
+      .populate('createdBy', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: { workouts },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ── GET /api/workouts/:id ───────────────────────────────────────────────────
 router.get('/:id', async (req, res, next) => {
   try {
@@ -163,35 +194,6 @@ router.delete('/:id', adminOnly, async (req, res, next) => {
   }
 });
 
-// ── GET /api/workouts/client/:clientId ──────────────────────────────────────
-// Get workouts assigned to a specific client
-router.get('/client/:clientId', async (req, res, next) => {
-  try {
-    // Only admin or the client themselves can access
-    if (
-      req.user.role !== 'admin' &&
-      req.user._id.toString() !== req.params.clientId
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized',
-      });
-    }
 
-    const workouts = await Workout.find({
-      assignedTo: req.params.clientId,
-      isActive: true,
-    })
-      .populate('createdBy', 'name')
-      .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      data: { workouts },
-    });
-  } catch (error) {
-    next(error);
-  }
-});
 
 module.exports = router;

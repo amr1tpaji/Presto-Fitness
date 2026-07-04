@@ -27,9 +27,10 @@ const makeAdmin = async () => {
       process.exit(0);
     }
 
-    user.role = 'admin';
-    await user.save();
-    
+    await User.findOneAndUpdate(
+      { phone: phoneNumber },
+      { role: 'admin' }
+    );
     console.log(`✅ Success! ${user.name} (${user.phone}) has been promoted to Admin.`);
     console.log(`You can now log out and log back in to access the Admin Dashboard.`);
     process.exit(0);

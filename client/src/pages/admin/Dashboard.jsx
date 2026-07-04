@@ -154,7 +154,7 @@ export default function Dashboard() {
                             >
                               {client.avatar ? (
                                 <img 
-                                  src={`http://localhost:5000/uploads/${client.avatar}`} 
+                                  src={`/uploads/${client.avatar}`} 
                                   alt="Avatar" 
                                   style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} 
                                 />

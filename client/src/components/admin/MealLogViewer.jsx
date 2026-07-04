@@ -129,7 +129,7 @@ export default function MealLogViewer({ clientId }) {
                       <div>
                         <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}>Attached Photo</h4>
                         <img 
-                          src={`http://localhost:5000/uploads/${log.photo}`} 
+                          src={`/uploads/${log.photo}`} 
                           alt="Meal" 
                           style={{ width: '100%', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
                         />

@@ -70,6 +70,35 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// ── GET /api/diets/client/:clientId ─────────────────────────────────────────
+router.get('/client/:clientId', async (req, res, next) => {
+  try {
+    if (
+      req.user.role !== 'admin' &&
+      req.user._id.toString() !== req.params.clientId
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized',
+      });
+    }
+
+    const dietPlans = await DietPlan.find({
+      assignedTo: req.params.clientId,
+      isActive: true,
+    })
+      .populate('createdBy', 'name')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: { dietPlans },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ── GET /api/diets/:id ─────────────────────────────────────────────────────
 router.get('/:id', async (req, res, next) => {
   try {
@@ -158,33 +187,6 @@ router.delete('/:id', adminOnly, async (req, res, next) => {
   }
 });
 
-// ── GET /api/diets/client/:clientId ─────────────────────────────────────────
-router.get('/client/:clientId', async (req, res, next) => {
-  try {
-    if (
-      req.user.role !== 'admin' &&
-      req.user._id.toString() !== req.params.clientId
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized',
-      });
-    }
 
-    const dietPlans = await DietPlan.find({
-      assignedTo: req.params.clientId,
-      isActive: true,
-    })
-      .populate('createdBy', 'name')
-      .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      data: { dietPlans },
-    });
-  } catch (error) {
-    next(error);
-  }
-});
 
 module.exports = router;

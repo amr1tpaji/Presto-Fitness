@@ -168,6 +168,7 @@ export default function LogMeal() {
                       <input
                         className="form-input"
                         type="number"
+                        step="any"
                         placeholder="Qty"
                         value={item.quantity}
                         onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}

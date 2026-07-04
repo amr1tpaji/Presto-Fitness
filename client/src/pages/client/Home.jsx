@@ -60,7 +60,7 @@ export default function Home() {
       setTasks((prev) =>
         prev.map((t) => {
           const id = t._id || t.id;
-          return id === taskId ? { ...t, completed: true } : t;
+          return id === taskId ? { ...t, isCompleted: true } : t;
         })
       );
       addToast('Task completed! Points earned 🎉', 'success');
@@ -71,8 +71,8 @@ export default function Home() {
     }
   };
 
-  const completedCount = tasks.filter((t) => t.completed).length;
-  const totalPoints = tasks.reduce((sum, t) => sum + (t.completed ? (t.points || 0) : 0), 0);
+  const completedCount = tasks.filter((t) => t.isCompleted).length;
+  const totalPoints = tasks.reduce((sum, t) => sum + (t.isCompleted ? (t.points || 0) : 0), 0);
 
   return (
     <div className="page client-home">
@@ -177,20 +177,20 @@ export default function Home() {
                 {tasks.map((task) => {
                   const tId = task._id || task.id;
                   return (
-                    <div key={tId} className="task-item" style={{ opacity: task.completed ? 0.6 : 1 }}>
+                    <div key={tId} className="task-item" style={{ opacity: task.isCompleted ? 0.6 : 1 }}>
                       <button
                         className="task-checkbox"
-                        onClick={() => !task.completed && handleCompleteTask(tId)}
-                        disabled={task.completed || completingTask === tId}
+                        onClick={() => !task.isCompleted && handleCompleteTask(tId)}
+                        disabled={task.isCompleted || completingTask === tId}
                         style={{
-                          cursor: task.completed ? 'default' : 'pointer',
+                          cursor: task.isCompleted ? 'default' : 'pointer',
                           background: 'none',
                           border: 'none',
                           padding: 0,
                           display: 'flex',
                         }}
                       >
-                        {task.completed ? (
+                        {task.isCompleted ? (
                           <CheckCircle2 size={22} style={{ color: 'var(--success, #22c55e)' }} />
                         ) : completingTask === tId ? (
                           <div
@@ -208,7 +208,7 @@ export default function Home() {
                         )}
                       </button>
                       <div style={{ flex: 1 }}>
-                        <span style={{ textDecoration: task.completed ? 'line-through' : 'none', fontWeight: 500 }}>
+                        <span style={{ textDecoration: task.isCompleted ? 'line-through' : 'none', fontWeight: 500 }}>
                           {task.title}
                         </span>
                       </div>

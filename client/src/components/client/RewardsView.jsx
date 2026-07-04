@@ -149,7 +149,7 @@ export default function RewardsView({ points = 0, streak = 0, earnedBadges = [] 
                     {badge.icon}
                   </div>
                   <p style={{ margin: 0, fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
-                    {badge.title}
+                    {badge.name || badge.title}
                   </p>
                   <p
                     className="text-muted"

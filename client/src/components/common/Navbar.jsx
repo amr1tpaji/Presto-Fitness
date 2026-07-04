@@ -62,7 +62,7 @@ export default function Navbar({ onToggleSidebar, sidebarOpen }) {
             >
               {user?.avatar ? (
                 <img 
-                  src={`http://localhost:5000/uploads/${user.avatar}`} 
+                  src={`/uploads/${user.avatar}`} 
                   alt="Avatar" 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />

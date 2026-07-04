@@ -42,8 +42,8 @@ export function AuthProvider({ children }) {
     return response.data;
   }, []);
 
-  const verifyOTP = useCallback(async (phone, code) => {
-    const response = await authAPI.verifyOTP({ phone, otp: code });
+  const verifyOTP = useCallback(async (email, code) => {
+    const response = await authAPI.verifyOTP({ email, otp: code });
     const payload = response.data.data;
     localStorage.setItem('accessToken', payload.accessToken);
     setUser(payload.user);

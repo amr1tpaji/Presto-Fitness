@@ -28,7 +28,7 @@ export default function Profile() {
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(
-    user?.avatar ? `http://localhost:5000/uploads/${user.avatar}` : ''
+    user?.avatar ? `/uploads/${user.avatar}` : ''
   );
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);

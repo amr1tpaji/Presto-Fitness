@@ -40,7 +40,7 @@ router.post('/', (req, res, next) => {
         items: items,
         photo: req.file ? req.file.filename : undefined,
         comment: req.body.comment,
-        isOnPlan: req.body.isOnPlan,
+        isOnPlan: req.body.isOnPlan === 'true' || req.body.isOnPlan === true,
         date: req.body.date || Date.now(),
       });
 

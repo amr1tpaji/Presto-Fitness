@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ToastContext } from '../../context/ToastContext';
 import { authAPI } from '../../services/api';
+import { useAuth } from '../../hooks/useAuth';
 import { ShieldCheck, RefreshCw } from 'lucide-react';
 import Button from '../../components/common/Button';
 import '../../styles/auth.css';
@@ -13,6 +14,7 @@ export default function OTPVerify() {
   const [countdown, setCountdown] = useState(120);
   const inputRefs = useRef([]);
   const { addToast } = useContext(ToastContext);
+  const { verifyOTP } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -89,8 +91,7 @@ export default function OTPVerify() {
     }
     setLoading(true);
     try {
-      const res = await authAPI.verifyOTP({ email, otp: code });
-      localStorage.setItem('accessToken', res.data.data.accessToken);
+      await verifyOTP(email, code);
 
       addToast('Account created and verified successfully!', 'success');
       navigate('/home', { replace: true });
