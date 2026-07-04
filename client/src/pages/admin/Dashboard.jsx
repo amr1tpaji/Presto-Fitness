@@ -5,7 +5,7 @@ import { ToastContext } from '../../context/ToastContext';
 import StatsOverview from '../../components/admin/StatsOverview';
 import Loader from '../../components/common/Loader';
 import Badge from '../../components/common/Badge';
-import { Users, Dumbbell, UtensilsCrossed, ArrowRight, Crown } from 'lucide-react';
+import { Users, Dumbbell, UtensilsCrossed, ArrowRight, Crown, Flame } from 'lucide-react';
 import '../../styles/dashboard.css';
 
 export default function Dashboard() {
