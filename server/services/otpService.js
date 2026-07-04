@@ -16,6 +16,8 @@ const sendOTP = async (email, otp) => {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/"/g, '') : '', 
       },
+      connectionTimeout: 5000, // 5 seconds max
+      greetingTimeout: 5000,
     });
 
     const info = await transporter.sendMail({
