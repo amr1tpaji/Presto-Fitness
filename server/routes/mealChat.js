@@ -66,7 +66,7 @@ router.post(
       }
 
       const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-1.5-flash',
         tools: [logMealTool],
         systemInstruction: `You are a strict fitness and nutrition AI assistant. 
 When a user uploads a food photo or describes a meal without explicitly stating the exact quantities or portion sizes (e.g., "I ate this", "a bowl of rice", "chicken"), YOU MUST NOT call the log_meal function immediately. 
@@ -150,7 +150,13 @@ Only call the log_meal function when you are reasonably confident about the exac
       }
 
     } catch (error) {
-      console.error(error);
+      console.error('MealChat Error:', error);
+      if (error.status === 429 || (error.message && error.message.includes('429')) || (error.message && error.message.includes('Too Many Requests'))) {
+        return res.status(429).json({ 
+          success: false, 
+          message: 'The AI is processing too many requests right now. Please wait about 30 seconds and try again!' 
+        });
+      }
       next(error);
     }
   }

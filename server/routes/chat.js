@@ -29,7 +29,7 @@ router.post('/', async (req, res, next) => {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       systemInstruction: SYSTEM_PROMPT
     });
 
@@ -54,6 +54,12 @@ router.post('/', async (req, res, next) => {
     });
   } catch (error) {
     console.error('Chat API Error:', error);
+    if (error.status === 429 || (error.message && error.message.includes('429')) || (error.message && error.message.includes('Too Many Requests'))) {
+      return res.status(429).json({ 
+        success: false, 
+        message: 'The AI Coach is very busy right now. Please wait about 30 seconds and try again!' 
+      });
+    }
     next(error);
   }
 });
