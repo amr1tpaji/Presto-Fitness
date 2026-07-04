@@ -45,13 +45,13 @@ if (useCloudinary) {
   storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-      // PDF needs 'raw' resource type in Cloudinary, images use 'image'
       const isPdf = file.mimetype === 'application/pdf';
-      return {
+      const params = {
         folder: 'presto-fitness',
-        format: isPdf ? 'pdf' : undefined,
         resource_type: isPdf ? 'raw' : 'image',
       };
+      if (isPdf) params.format = 'pdf';
+      return params;
     },
   });
 } else {
