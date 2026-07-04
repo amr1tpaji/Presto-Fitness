@@ -94,13 +94,24 @@ Only call the log_meal function when you are reasonably confident about the exac
         
         const targetPath = req.file ? req.file.path : req.body.existingPhoto;
 
+        const fs = require('fs');
+        const path = require('path');
+        let localFilePath = targetPath;
+        
+        // If it's a full URL to our server, extract just the filename
         if (targetPath.startsWith('http')) {
-          const imgResponse = await fetch(targetPath);
-          const buffer = await imgResponse.arrayBuffer();
-          imageBase64 = Buffer.from(buffer).toString('base64');
-        } else {
-          const fs = require('fs');
-          imageBase64 = fs.readFileSync(targetPath, 'base64');
+          const parts = targetPath.split('/');
+          const filename = parts[parts.length - 1];
+          localFilePath = path.join(__dirname, '../uploads', filename);
+        } else if (!path.isAbsolute(targetPath)) {
+          // It's just a filename or relative path
+          localFilePath = path.join(__dirname, '../uploads', path.basename(targetPath));
+        }
+
+        try {
+          imageBase64 = fs.readFileSync(localFilePath, 'base64');
+        } catch (fsErr) {
+          throw new Error('Failed to read image file from server storage');
         }
 
         parts.push({
