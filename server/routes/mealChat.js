@@ -4,7 +4,6 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const MealLog = require('../models/MealLog');
 const { protect } = require('../middleware/auth');
 const { upload, getCloudinaryUrl } = require('../middleware/upload');
-const fetch = require('node-fetch'); // or use native fetch in node 18+
 
 const router = express.Router();
 router.use(protect);
