@@ -165,4 +165,9 @@ export const paymentsAPI = {
   getAllAdmin: (params) => API.get('/payments/admin/all', { params }),
 };
 
+// ===== Chat API =====
+export const chatAPI = {
+  sendMessage: (data) => API.post('/chat', data),
+};
+
 export default API;

@@ -22,6 +22,7 @@ const mealRoutes = require('./routes/meals');
 const taskRoutes = require('./routes/tasks');
 const rewardRoutes = require('./routes/rewards');
 const paymentRoutes = require('./routes/payments');
+const chatRoutes = require('./routes/chat');
 
 // ── Connect to MongoDB ─────────────────────────────────────────────────────
 connectDB();
@@ -84,6 +85,7 @@ app.use('/api/meals', mealRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/rewards', rewardRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/chat', chatRoutes);
 
 // ── Health Check ────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

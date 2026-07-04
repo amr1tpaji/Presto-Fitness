@@ -58,6 +58,9 @@ function AdminLayout() {
   );
 }
 
+import Chatbot from './components/common/Chatbot';
+import './styles/chatbot.css'; // Import the new Chatbot CSS
+
 function ClientLayout() {
   return (
     <div className="client-layout">
@@ -66,6 +69,7 @@ function ClientLayout() {
       <main className="client-main">
         <Outlet />
       </main>
+      <Chatbot />
     </div>
   );
 }
