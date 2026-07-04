@@ -66,7 +66,7 @@ router.post(
       }
 
       const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         tools: [logMealTool],
         systemInstruction: `You are a strict fitness and nutrition AI assistant. 
 When a user uploads a food photo or describes a meal without explicitly stating the exact quantities or portion sizes (e.g., "I ate this", "a bowl of rice", "chicken"), YOU MUST NOT call the log_meal function immediately. 
