@@ -30,7 +30,12 @@ export default function Login() {
       navigate(data.user.role === 'admin' ? '/admin/dashboard' : '/home');
     } catch (err) {
       const errMsg = err.response?.data?.errors?.[0]?.msg || err.response?.data?.message || 'Login failed';
-      addToast(errMsg, 'error');
+      if (errMsg === 'PENDING_APPROVAL') {
+        addToast('Your account is pending activation.', 'warning');
+        navigate('/verify-key', { state: { identifier: phone } });
+      } else {
+        addToast(errMsg, 'error');
+      }
     } finally {
       setLoading(false);
     }

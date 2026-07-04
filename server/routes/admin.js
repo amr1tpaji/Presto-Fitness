@@ -30,7 +30,7 @@ router.get('/clients', async (req, res, next) => {
 
     const [clients, total] = await Promise.all([
       User.find(filter)
-        .select('name phone email avatar gender currentWeight subscription rewards.streak')
+        .select('name phone email avatar gender currentWeight subscription rewards.streak isPhoneVerified activationKey')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit)),

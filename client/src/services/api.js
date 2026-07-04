@@ -76,13 +76,14 @@ API.interceptors.response.use(
 
 // ===== Auth API =====
 export const authAPI = {
-  register: (data) => API.post('/auth/register', data),
-  verifyOTP: (data) => API.post('/auth/verify-otp', data),
   login: (data) => API.post('/auth/login', data),
+  register: (data) => API.post('/auth/register', data),
+  verifyKey: (data) => API.post('/auth/verify-key', data),
   logout: () => API.post('/auth/logout'),
-  getMe: () => API.get('/auth/me'),
-  refreshToken: () => API.post('/auth/refresh'),
-  updateProfile: (data) => API.put('/auth/profile', data),
+  getProfile: () => API.get('/auth/me'),
+  updateProfile: (data) => API.put('/auth/profile', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
   changePassword: (data) => API.put('/auth/password', data),
 };
 

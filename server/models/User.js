@@ -70,6 +70,9 @@ const userSchema = new mongoose.Schema(
         enum: ['active', 'expired', 'cancelled'],
       },
     },
+    activationKey: {
+      type: String,
+    },
     rewards: {
       points: { type: Number, default: 0 },
       badges: [

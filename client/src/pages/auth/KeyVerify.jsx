@@ -7,34 +7,26 @@ import { ShieldCheck, RefreshCw } from 'lucide-react';
 import Button from '../../components/common/Button';
 import '../../styles/auth.css';
 
-export default function OTPVerify() {
+export default function KeyVerify() {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [countdown, setCountdown] = useState(120);
   const inputRefs = useRef([]);
   const { addToast } = useContext(ToastContext);
-  const { verifyOTP } = useAuth();
+  const { verifyKey } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Passed from Register.jsx
-  const email = location.state?.email;
+  // Passed from Register.jsx or Login.jsx
+  const identifier = location.state?.email || location.state?.identifier;
 
   useEffect(() => {
-    if (!email) {
+    if (!identifier) {
       addToast('Session expired. Please register again.', 'error');
       navigate('/register', { replace: true });
     }
-  }, [email, navigate, addToast]);
+  }, [identifier, navigate, addToast]);
 
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const timer = setInterval(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [countdown]);
+
 
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -42,11 +34,7 @@ export default function OTPVerify() {
     }
   }, []);
 
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
-  };
+
 
   const handleChange = useCallback((index, value) => {
     if (value.length > 1) {
@@ -86,18 +74,18 @@ export default function OTPVerify() {
   const handleVerify = async () => {
     const code = otp.join('');
     if (code.length !== 6) {
-      addToast('Please enter the complete 6-digit OTP', 'error');
+      addToast('Please enter the complete 6-digit Activation Key', 'error');
       return;
     }
     setLoading(true);
     try {
-      await verifyOTP(email, code);
-
-      addToast('Account created and verified successfully!', 'success');
+      await verifyKey(identifier, code);
+      
+      addToast('Account activated successfully!', 'success');
       navigate('/home', { replace: true });
     } catch (err) {
       console.error(err);
-      addToast(err.response?.data?.message || 'Invalid OTP', 'error');
+      addToast(err.response?.data?.message || 'Invalid Key', 'error');
       setOtp(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
@@ -105,12 +93,7 @@ export default function OTPVerify() {
     }
   };
 
-  const handleResend = () => {
-    addToast('To resend the OTP, please go back and register again.', 'warning');
-    navigate('/register', { replace: true });
-  };
-
-  if (!email) return null;
+  if (!identifier) return null;
 
   return (
     <div className="auth-container">
@@ -119,10 +102,10 @@ export default function OTPVerify() {
           <div className="auth-logo">
             <ShieldCheck size={32} />
           </div>
-          <h1 className="auth-title">Verify Email</h1>
+          <h1 className="auth-title">Account Pending</h1>
           <p className="auth-subtitle">
-            Enter the 6-digit code sent to<br />
-            <strong style={{ color: 'var(--accent)', letterSpacing: '1px' }}>{email}</strong>
+            Your account is locked. Please ask your trainer for your 6-digit access key.<br />
+            <strong style={{ color: 'var(--accent)', letterSpacing: '1px' }}>{identifier}</strong>
           </p>
         </div>
         <div className="auth-form">
@@ -144,20 +127,9 @@ export default function OTPVerify() {
           </div>
 
           <div style={{ textAlign: 'center', margin: '1rem 0' }}>
-            {countdown > 0 ? (
-              <p className="text-muted" style={{ fontSize: '0.9rem' }}>
-                Resend code in <span className="text-accent" style={{ fontWeight: 600 }}>{formatTime(countdown)}</span>
-              </p>
-            ) : (
-              <Button
-                variant="ghost"
-                onClick={handleResend}
-                loading={resending}
-                icon={<RefreshCw size={16} />}
-              >
-                Resend OTP
-              </Button>
-            )}
+            <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+              Your trainer can find this key on their Admin Dashboard.
+            </p>
           </div>
 
           <Button

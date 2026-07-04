@@ -9,7 +9,7 @@ import Toast from './components/common/Toast';
 // Auth pages
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
-import OTPVerify from './pages/auth/OTPVerify';
+import KeyVerify from './pages/auth/KeyVerify';
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -110,7 +110,7 @@ export default function App() {
         {/* Auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/verify-otp" element={<OTPVerify />} />
+        <Route path="/verify-key" element={<KeyVerify />} />
 
         {/* Admin routes */}
         <Route element={<ProtectedRoute />}>

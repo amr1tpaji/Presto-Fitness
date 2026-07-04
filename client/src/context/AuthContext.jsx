@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
       const token = localStorage.getItem('accessToken');
       if (token) {
         try {
-          const response = await authAPI.getMe();
+          const response = await authAPI.getProfile();
           setUser(response.data.data.user);
           setIsAuthenticated(true);
         } catch {
@@ -42,8 +42,8 @@ export function AuthProvider({ children }) {
     return response.data;
   }, []);
 
-  const verifyOTP = useCallback(async (email, code) => {
-    const response = await authAPI.verifyOTP({ email, otp: code });
+  const verifyKey = useCallback(async (identifier, code) => {
+    const response = await authAPI.verifyKey({ identifier, key: code });
     const payload = response.data.data;
     localStorage.setItem('accessToken', payload.accessToken);
     setUser(payload.user);
@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
 
   const reloadUser = useCallback(async () => {
     try {
-      const response = await authAPI.getMe();
+      const response = await authAPI.getProfile();
       setUser(response.data.data.user);
     } catch {
       // ignore
@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
     isAuthenticated,
     login,
     register,
-    verifyOTP,
+    verifyKey,
     logout,
     reloadUser,
     isAdmin,

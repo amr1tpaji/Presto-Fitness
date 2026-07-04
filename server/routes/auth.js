@@ -3,9 +3,8 @@ const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
-const PendingUser = require('../models/PendingUser');
 const { protect } = require('../middleware/auth');
-const { generateOTP, sendOTP, verifyOTP } = require('../services/otpService');
+const crypto = require('crypto');
 
 const router = express.Router();
 
@@ -89,37 +88,27 @@ router.post(
         });
       }
 
-      // Generate and store OTP
-      const otp = generateOTP();
-      const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+      // Generate 6-digit Activation Key
+      const activationKey = crypto.randomInt(100000, 999999).toString();
 
-      // Upsert PendingUser (in case they register again before 10 mins)
-      let pendingUser = await PendingUser.findOne({ email });
-      if (pendingUser) {
-        pendingUser.name = name;
-        pendingUser.phone = phone;
-        pendingUser.password = password;
-        pendingUser.otp = { code: otp, expiresAt: otpExpiresAt };
-        await pendingUser.save();
-      } else {
-        pendingUser = await PendingUser.create({
-          name,
-          phone,
-          password,
-          email,
-          otp: { code: otp, expiresAt: otpExpiresAt },
-        });
-      }
+      const user = await User.create({
+        name,
+        phone,
+        password,
+        email,
+        activationKey,
+        isPhoneVerified: false,
+      });
 
-      // Send OTP via Email using Nodemailer
-      const emailResult = await sendOTP(email, otp);
+      // Strip sensitive info from response
+      const userObj = user.toObject();
+      delete userObj.password;
+      delete userObj.activationKey;
 
       res.status(201).json({
         success: true,
-        message: 'OTP generated. Please verify your phone/email.',
-        data: { 
-          fallbackOtp: emailResult.success ? undefined : emailResult.fallbackOtp 
-        },
+        message: 'Account created. Pending admin approval.',
+        data: { user: userObj },
       });
     } catch (error) {
       next(error);
@@ -129,15 +118,15 @@ router.post(
 
 
 
-// ── POST /api/auth/verify-otp ───────────────────────────────────────────────
+// ── POST /api/auth/verify-key ───────────────────────────────────────────────
 router.post(
-  '/verify-otp',
+  '/verify-key',
   [
-    body('email').trim().notEmpty().withMessage('Email is required'),
-    body('otp')
+    body('identifier').trim().notEmpty().withMessage('Email or phone is required'),
+    body('key')
       .trim()
       .isLength({ min: 6, max: 6 })
-      .withMessage('OTP must be 6 digits'),
+      .withMessage('Key must be 6 digits'),
   ],
   async (req, res, next) => {
     try {
@@ -150,36 +139,36 @@ router.post(
         });
       }
 
-      const { email, otp } = req.body;
+      const { identifier, key } = req.body;
 
-      const pendingUser = await PendingUser.findOne({ email });
-      if (!pendingUser) {
+      const user = await User.findOne({
+        $or: [{ phone: identifier }, { email: identifier }],
+      });
+      if (!user) {
         return res.status(404).json({
           success: false,
-          message: 'OTP expired or user not found. Please register again.',
+          message: 'User not found',
         });
       }
 
-      const isValid = verifyOTP(pendingUser.otp?.code, otp, pendingUser.otp?.expiresAt);
-      if (!isValid) {
+      if (user.isPhoneVerified) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid or expired OTP',
+          message: 'Account is already activated',
         });
       }
 
-      // OTP is valid! Create the real user account now.
-      const user = await User.create({
-        name: pendingUser.name,
-        phone: pendingUser.phone,
-        email: pendingUser.email,
-        password: pendingUser.password, // Pre-hashed by PendingUser schema? Wait, PendingUser doesn't hash it! 
-        // Let's pass the raw password because User.create will trigger the User schema's pre-save hash!
-        isPhoneVerified: true,
-      });
+      if (user.activationKey !== key) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid access key',
+        });
+      }
 
-      // Delete the pending user
-      await PendingUser.findByIdAndDelete(pendingUser._id);
+      // Key is valid! Activate the user account
+      user.isPhoneVerified = true;
+      user.activationKey = undefined;
+      await user.save();
 
       const accessToken = generateAccessToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
@@ -190,7 +179,7 @@ router.post(
 
       res.json({
         success: true,
-        message: 'Phone verified successfully',
+        message: 'Account activated successfully',
         data: { user: userObj, accessToken },
       });
     } catch (error) {
@@ -232,6 +221,13 @@ router.post(
         return res.status(401).json({
           success: false,
           message: 'Invalid credentials',
+        });
+      }
+
+      if (!user.isPhoneVerified) {
+        return res.status(403).json({
+          success: false,
+          message: 'PENDING_APPROVAL',
         });
       }
 

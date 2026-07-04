@@ -130,9 +130,16 @@ export default function ClientList() {
                         </span>
                       </td>
                       <td>
-                        <Badge variant={client.subscription?.status === 'active' ? 'success' : 'warning'}>
-                          {client.subscription?.status || 'inactive'}
-                        </Badge>
+                        {client.isPhoneVerified ? (
+                          <Badge variant={client.subscription?.status === 'active' ? 'success' : 'warning'}>
+                            {client.subscription?.status || 'inactive'}
+                          </Badge>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <Badge variant="danger">Pending</Badge>
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent)' }}>Key: {client.activationKey}</span>
+                          </div>
+                        )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         <Link to={`/admin/clients/${cId}`} className="btn btn-ghost btn-sm" style={{ textDecoration: 'none' }}>

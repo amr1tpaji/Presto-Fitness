@@ -68,15 +68,9 @@ export default function Register() {
         password: formData.password,
       });
       
-      const fallbackOtp = res.data?.data?.fallbackOtp;
-
-      if (fallbackOtp) {
-        addToast(`[TESTING MODE] Your OTP is: ${fallbackOtp}`, 'warning');
-      } else {
-        addToast('Code sent to your email!', 'success');
-      }
+      addToast('Account created! Pending admin approval.', 'success');
       
-      navigate('/verify-otp', { 
+      navigate('/verify-key', { 
         state: { 
           email: formData.email.trim(),
         } 
