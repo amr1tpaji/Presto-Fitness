@@ -22,7 +22,7 @@ const QUOTES = [
 ];
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, reloadUser } = useAuth();
   const { addToast } = useContext(ToastContext);
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
@@ -63,6 +63,7 @@ export default function Home() {
           return id === taskId ? { ...t, isCompleted: true } : t;
         })
       );
+      await reloadUser();
       addToast('Task completed! Points earned 🎉', 'success');
     } catch (err) {
       addToast(err.response?.data?.message || 'Failed to complete task', 'error');
@@ -103,7 +104,7 @@ export default function Home() {
               🔥
             </div>
             <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--warning, #f59e0b)', marginTop: 4 }}>
-              {user?.streak || 0}
+              {user?.rewards?.streak || 0}
             </div>
             <span className="text-muted" style={{ fontSize: '0.8rem' }}>Day Streak</span>
           </div>
@@ -129,7 +130,7 @@ export default function Home() {
           <div className="stat-card-icon" style={{ color: 'var(--accent)' }}>
             <Star size={24} />
           </div>
-          <div className="stat-card-value">{user?.points || 0}</div>
+          <div className="stat-card-value">{user?.rewards?.points || 0}</div>
           <div className="stat-card-label">Total Points</div>
         </div>
       </div>

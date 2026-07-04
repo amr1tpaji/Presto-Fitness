@@ -28,9 +28,9 @@ export default function MyRewards() {
     fetchRewards();
   }, []);
 
-  const points = rewardsData?.points ?? user?.points ?? 0;
-  const streak = rewardsData?.streak ?? user?.streak ?? 0;
-  const earnedBadges = rewardsData?.badges || user?.badges || [];
+  const points = rewardsData?.points ?? user?.rewards?.points ?? 0;
+  const streak = rewardsData?.streak ?? user?.rewards?.streak ?? 0;
+  const earnedBadges = rewardsData?.badges || user?.rewards?.badges || [];
 
   if (loading) return <div className="page"><Loader /></div>;
 
