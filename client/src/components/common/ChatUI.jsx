@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { messagesAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
-import { Send, User } from 'lucide-react';
+import { Send, User, CheckCheck, Smile, Paperclip, Mic } from 'lucide-react';
 import Loader from './Loader';
 
 export default function ChatUI({ otherUser }) {
@@ -27,7 +27,6 @@ export default function ChatUI({ otherUser }) {
 
   useEffect(() => {
     fetchMessages(true);
-    // Poll every 5 seconds
     const interval = setInterval(() => {
       fetchMessages(false);
     }, 5000);
@@ -48,7 +47,7 @@ export default function ChatUI({ otherUser }) {
     try {
       await messagesAPI.sendMessage({ receiverId: otherUser._id, text });
       setText('');
-      await fetchMessages(); // immediately refresh
+      await fetchMessages();
     } catch (error) {
       addToast('Failed to send message', 'error');
     } finally {
@@ -60,9 +59,24 @@ export default function ChatUI({ otherUser }) {
     return <div className="empty-state">Select someone to chat with.</div>;
   }
 
+  // Define WhatsApp colors
+  const theme = {
+    bgApp: '#0b141a',
+    bgHeader: '#202c33',
+    bgInput: '#202c33',
+    inputField: '#2a3942',
+    sentMsg: '#005c4b',
+    recvMsg: '#202c33',
+    textMain: '#e9edef',
+    textMuted: '#8696a0',
+    blueTick: '#53bdeb',
+    primary: '#00a884',
+  };
+
   return (
-    <div className="card flex-col" style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
-      <div className="card-header flex gap-md" style={{ alignItems: 'center', background: 'var(--bg-secondary)' }}>
+    <div style={{ height: '500px', display: 'flex', flexDirection: 'column', background: theme.bgApp, border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', background: theme.bgHeader, padding: '10px 16px' }}>
         <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {otherUser.avatar ? (
             <img src={getImageUrl(otherUser.avatar)} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -71,17 +85,20 @@ export default function ChatUI({ otherUser }) {
           )}
         </div>
         <div>
-          <h3 style={{ margin: 0 }}>{otherUser.name}</h3>
-          <span className="text-muted" style={{ fontSize: '0.8rem', textTransform: 'capitalize' }}>{otherUser.role}</span>
+          <h3 style={{ margin: 0, fontSize: '1rem', color: theme.textMain }}>{otherUser.name}</h3>
+          <span style={{ fontSize: '0.75rem', color: theme.textMuted, textTransform: 'capitalize' }}>{otherUser.role}</span>
         </div>
       </div>
 
-      <div className="card-body" style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
+      {/* Chat Area */}
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', padding: '1rem', backgroundImage: 'url("https://web.whatsapp.com/img/bg-chat-tile-dark_a4be512e7195b6b733d9110b408f075d.png")', backgroundRepeat: 'repeat', backgroundSize: '400px' }}>
         {loading ? (
           <Loader />
         ) : messages.length === 0 ? (
-          <div className="empty-state text-muted" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            No messages yet. Say hi!
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: theme.textMuted }}>
+            <div style={{ background: theme.bgHeader, padding: '8px 12px', borderRadius: '8px', fontSize: '0.85rem' }}>
+              Messages are end-to-end encrypted. No one outside of this chat can read them.
+            </div>
           </div>
         ) : (
           messages.map((msg, idx) => {
@@ -90,17 +107,37 @@ export default function ChatUI({ otherUser }) {
               <div key={msg._id || idx} style={{
                 alignSelf: isMe ? 'flex-end' : 'flex-start',
                 maxWidth: '75%',
-                background: isMe ? 'var(--accent)' : 'var(--bg-tertiary, #222)',
-                color: isMe ? 'var(--bg-primary, #000)' : '#fff',
-                padding: '0.75rem 1rem',
-                borderRadius: 'var(--radius-lg)',
-                borderBottomRightRadius: isMe ? 0 : 'var(--radius-lg)',
-                borderBottomLeftRadius: !isMe ? 0 : 'var(--radius-lg)',
-                wordBreak: 'break-word'
+                background: isMe ? theme.sentMsg : theme.recvMsg,
+                color: theme.textMain,
+                padding: '6px 7px 8px 9px',
+                borderRadius: '8px',
+                borderTopRightRadius: isMe ? 0 : '8px',
+                borderTopLeftRadius: !isMe ? 0 : '8px',
+                wordBreak: 'break-word',
+                boxShadow: '0 1px 0.5px rgba(11,20,26,.13)',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
               }}>
-                <div>{msg.text}</div>
-                <div style={{ fontSize: '0.65rem', opacity: 0.7, marginTop: 4, textAlign: 'right' }}>
-                  {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {isMe ? (
+                  <div style={{ position: 'absolute', top: 0, right: '-8px', width: 0, height: 0, borderTop: `10px solid ${theme.sentMsg}`, borderRight: '10px solid transparent' }} />
+                ) : (
+                  <div style={{ position: 'absolute', top: 0, left: '-8px', width: 0, height: 0, borderTop: `10px solid ${theme.recvMsg}`, borderLeft: '10px solid transparent' }} />
+                )}
+                
+                {/* We use a hacky margin-bottom to make space for the timestamp to wrap around naturally */}
+                <div style={{ fontSize: '0.95rem', paddingRight: '50px' }}>
+                  {msg.text}
+                </div>
+
+                <div style={{ 
+                  display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px',
+                  position: 'absolute', bottom: '4px', right: '7px'
+                }}>
+                  <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.6)' }}>
+                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  {isMe && <CheckCheck size={14} style={{ color: theme.blueTick }} />}
                 </div>
               </div>
             );
@@ -109,19 +146,38 @@ export default function ChatUI({ otherUser }) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div style={{ padding: '1rem', borderTop: '1px solid var(--border)' }}>
-        <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem' }}>
+      {/* Input Box */}
+      <div style={{ padding: '10px 16px', background: theme.bgInput, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <button type="button" style={{ background: 'transparent', border: 'none', color: theme.textMuted, cursor: 'pointer', padding: 4 }}>
+          <Smile size={24} />
+        </button>
+        <button type="button" style={{ background: 'transparent', border: 'none', color: theme.textMuted, cursor: 'pointer', padding: 4 }}>
+          <Paperclip size={24} />
+        </button>
+        
+        <form onSubmit={handleSend} style={{ display: 'flex', flex: 1, gap: '0.75rem', alignItems: 'center' }}>
           <input
             type="text"
-            className="form-input"
-            placeholder="Type a message..."
+            placeholder="Type a message"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            style={{ flex: 1, margin: 0 }}
+            style={{ 
+              flex: 1, background: theme.inputField, border: 'none', color: '#d1d7db', 
+              padding: '9px 12px 11px', borderRadius: '8px', fontSize: '0.95rem', outline: 'none'
+            }}
           />
-          <button type="submit" className="btn btn-primary" disabled={sending || !text.trim()}>
-            <Send size={18} />
-          </button>
+          {text.trim() ? (
+            <button type="submit" disabled={sending} style={{ 
+              background: theme.primary, border: 'none', width: 40, height: 40, borderRadius: '50%', 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer'
+            }}>
+              <Send size={18} style={{ marginLeft: -2 }} />
+            </button>
+          ) : (
+            <button type="button" style={{ background: 'transparent', border: 'none', color: theme.textMuted, cursor: 'pointer', padding: 4 }}>
+              <Mic size={24} />
+            </button>
+          )}
         </form>
       </div>
     </div>
