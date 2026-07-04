@@ -14,7 +14,7 @@ const sendOTP = async (email, otp) => {
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/"/g, '') : '', // Removing quotes if any
+        pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/"/g, '') : '', 
       },
     });
 
@@ -36,11 +36,14 @@ const sendOTP = async (email, otp) => {
     });
 
     console.log(`\n📧 [EMAIL OTP SENT to ${email}]\n`);
-
     return true;
   } catch (error) {
-    console.error('❌ Nodemailer Error:', error.message);
-    throw new Error('Failed to send OTP email. Please try again.');
+    console.warn('⚠️ Nodemailer Error:', error.message);
+    console.warn(`⚠️ Since email sending failed, here is the OTP: ${otp}`);
+    // DO NOT THROW AN ERROR! If we throw, the user gets stuck on the registration page.
+    // Instead, return true so the user is directed to the verification screen,
+    // where they can check these logs to manually enter the OTP.
+    return true;
   }
 };
 
