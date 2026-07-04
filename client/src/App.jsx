@@ -66,28 +66,6 @@ function ClientLayout() {
       <main className="client-main">
         <Outlet />
       </main>
-      <nav className="client-bottom-tabs hide-desktop">
-        <NavLink to="/home" className={({ isActive }) => `bottom-tab ${isActive ? 'active' : ''}`}>
-          <Home size={20} />
-          <span>Home</span>
-        </NavLink>
-        <NavLink to="/workout" className={({ isActive }) => `bottom-tab ${isActive ? 'active' : ''}`}>
-          <Dumbbell size={20} />
-          <span>Workout</span>
-        </NavLink>
-        <NavLink to="/diet" className={({ isActive }) => `bottom-tab ${isActive ? 'active' : ''}`}>
-          <UtensilsCrossed size={20} />
-          <span>Diet</span>
-        </NavLink>
-        <NavLink to="/progress" className={({ isActive }) => `bottom-tab ${isActive ? 'active' : ''}`}>
-          <TrendingUp size={20} />
-          <span>Progress</span>
-        </NavLink>
-        <NavLink to="/rewards" className={({ isActive }) => `bottom-tab ${isActive ? 'active' : ''}`}>
-          <Trophy size={20} />
-          <span>Rewards</span>
-        </NavLink>
-      </nav>
     </div>
   );
 }

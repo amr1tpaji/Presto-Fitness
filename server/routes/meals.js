@@ -16,27 +16,22 @@ router.post('/', (req, res, next) => {
     if (uploadErr) return next(uploadErr);
     
     try {
-      // Because we are using multipart/form-data, req.body fields might be strings
       let items = req.body.items;
-      if (typeof items === 'string') {
+      if (items && typeof items === 'string') {
         try {
           items = JSON.parse(items);
         } catch (e) {
-          return res.status(400).json({ success: false, message: 'Invalid items format' });
+          items = [];
         }
       }
 
-      if (!req.body.mealType || !['Breakfast', 'Lunch', 'Dinner', 'Snack'].includes(req.body.mealType)) {
-        return res.status(400).json({ success: false, message: 'Valid meal type is required' });
-      }
-
-      if (!items || !Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ success: false, message: 'At least one food item is required' });
+      if (!items || !Array.isArray(items)) {
+        items = [];
       }
 
       const mealLog = await MealLog.create({
         userId: req.user._id,
-        mealType: req.body.mealType,
+        mealType: req.body.mealType || 'Snack', // Default if missing
         items: items,
         photo: req.file ? req.file.filename : undefined,
         comment: req.body.comment,
