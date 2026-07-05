@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { chatAPI, messagesAPI } from '../../services/api';
-import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle } from 'lucide-react';
+import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle, Mail } from 'lucide-react';
 import { ToastContext } from '../../context/ToastContext';
 
 export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = null }) {
@@ -77,6 +77,42 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
     }
   };
 
+  useEffect(() => {
+    const handleMealLogged = async (e) => {
+      const items = e.detail?.items || [];
+      if (!items.length) return;
+      
+      const mealDesc = items.map(i => `${i.quantity}${i.unit} ${i.food}`).join(', ');
+      const text = `I just logged a meal: ${mealDesc}. Can you review it?`;
+      const userMessage = { role: 'user', text };
+      
+      setIsOpen(true);
+      const currentHistory = [...messages];
+      setMessages(prev => [...prev, userMessage]);
+      setLoading(true);
+
+      try {
+        const historyToPass = currentHistory.filter((_, idx) => idx !== 0);
+        const res = await chatAPI.sendMessage({
+          message: text,
+          history: historyToPass
+        });
+
+        const reply = res.data.data.reply;
+        const mood = res.data.data.mood || 'happy';
+        setCurrentMood(mood);
+        setMessages(prev => [...prev, { role: 'model', text: reply, mood }]);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    window.addEventListener('MEAL_LOGGED', handleMealLogged);
+    return () => window.removeEventListener('MEAL_LOGGED', handleMealLogged);
+  }, [messages, setIsOpen]);
+
   return (
     <>
       {!isOpen && isOpenExternal === null && (
@@ -95,33 +131,22 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
           >
             <img src="/kitty_happy.png" alt="Kitty Companion" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </button>
-          <button
+          <a
+            href="mailto:pajilifts@gmail.com"
             className="chatbot-fab"
-            onClick={() => {
-              if (location.pathname === '/messages') {
-                navigate('/home');
-              } else {
-                navigate('/messages');
-              }
-            }}
-            title="Chat with Trainer"
+            title="Direct Chat with Admin"
             style={{
               bottom: '90px',
-              background: 'var(--warning, #f59e0b)'
+              background: 'var(--accent, #6366f1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              textDecoration: 'none'
             }}
           >
-            <MessageCircle size={24} />
-            {unreadCount > 0 && (
-              <div style={{
-                position: 'absolute', top: -2, right: -2, background: 'var(--danger, #ef4444)',
-                color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', borderRadius: '50%',
-                width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-              }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </div>
-            )}
-          </button>
+            <Mail size={24} />
+          </a>
         </>
       )}
 

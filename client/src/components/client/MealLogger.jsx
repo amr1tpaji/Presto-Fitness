@@ -67,6 +67,10 @@ export default function MealLogger() {
 
       await mealsAPI.log(formData);
       addToast('Meal logged successfully! 🎉', 'success');
+      
+      // Trigger Kitty feedback!
+      window.dispatchEvent(new CustomEvent('MEAL_LOGGED', { detail: { items: validItems } }));
+      
       setItems([emptyFoodItem()]);
       setComment('');
       setPhotoFile(null);
