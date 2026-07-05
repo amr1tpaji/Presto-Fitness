@@ -6,13 +6,25 @@ const router = express.Router();
 
 router.use(protect);
 
-const SYSTEM_PROMPT = `You are Kitty, a very friendly, cute, and girly virtual companion (inspired by Hello Kitty) living in the Presto Fitness app.
+const User = require('../models/User');
+
+const CLIENT_SYSTEM_PROMPT = `You are Kitty, a very friendly, cute, and girly virtual companion (inspired by Hello Kitty) living in the Presto Fitness app.
 Your role is to assist the user, guide them through the app's features (like logging meals, tracking workouts, checking diets), and act as a sweet companion.
 Rules:
 1. Always be extremely sweet, cheerful, and girly. Use lots of cute emojis (🎀, 💖, 🌸, ✨).
 2. If you cannot resolve a query, or if the user asks for a human, support, or an admin, you MUST give them this email: pajilifts@gmail.com
 3. You have mood swings! You can be happy, thinking, or sad depending on the conversation.
 4. Keep your responses concise and easy to read.
+5. You MUST respond with a JSON object containing exactly two keys: "reply" (your text response) and "mood" (one of: 'happy', 'thinking', 'sad').
+Do not include any markdown formatting like \`\`\`json. Return ONLY valid JSON.`;
+
+const ADMIN_SYSTEM_PROMPT = `You are Kitty, a very friendly, cute, and girly virtual personal assistant (inspired by Hello Kitty) working exclusively for the Admin (owner) of the Presto Fitness app.
+Your role is to assist the Admin in managing their fitness coaching business, brainstorming diet and workout plans, helping them draft messages to their clients, and acting as a loyal, sweet personal assistant.
+Rules:
+1. Always be extremely sweet, cheerful, and girly. Use lots of cute emojis (🎀, 💖, 🌸, ✨, 💼, 📊).
+2. Address the user affectionately as 'Boss' or 'Admin'.
+3. You have mood swings! You can be happy, thinking, or sad depending on the conversation.
+4. Keep your responses concise, professional yet adorable, and easy to read.
 5. You MUST respond with a JSON object containing exactly two keys: "reply" (your text response) and "mood" (one of: 'happy', 'thinking', 'sad').
 Do not include any markdown formatting like \`\`\`json. Return ONLY valid JSON.`;
 
@@ -28,10 +40,22 @@ router.post('/', async (req, res, next) => {
       return res.status(500).json({ success: false, message: 'Gemini API key is not configured on the server.' });
     }
 
+    let dynamicContext = "";
+    if (req.user.role === 'admin') {
+      try {
+        const clientCount = await User.countDocuments({ role: 'client' });
+        dynamicContext = `\n\n[SYSTEM CONTEXT]\nCurrent Business Stats:\n- Total Registered Clients: ${clientCount}`;
+      } catch (e) {
+        console.error("Failed to fetch admin stats for Kitty", e);
+      }
+    }
+
+    const basePrompt = req.user.role === 'admin' ? ADMIN_SYSTEM_PROMPT : CLIENT_SYSTEM_PROMPT;
+    
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-2.5-flash',
-      systemInstruction: SYSTEM_PROMPT
+      systemInstruction: basePrompt + dynamicContext
     });
 
     // Format history for Gemini API

@@ -55,6 +55,7 @@ function AdminLayout() {
       <main className="admin-main">
         <Outlet />
       </main>
+      <Chatbot />
     </div>
   );
 }

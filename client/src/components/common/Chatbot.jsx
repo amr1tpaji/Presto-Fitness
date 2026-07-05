@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { chatAPI, messagesAPI } from '../../services/api';
-import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle, Mail } from 'lucide-react';
+import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle } from 'lucide-react';
 import { ToastContext } from '../../context/ToastContext';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = null }) {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [localIsOpen, setLocalIsOpen] = useState(false);
@@ -131,33 +133,36 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
           >
             <img src="/kitty_happy.png" alt="Kitty Companion" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </button>
-          <button
-            className="chatbot-fab"
-            onClick={() => {
-              if (location.pathname === '/messages') {
-                navigate('/home');
-              } else {
-                navigate('/messages');
-              }
-            }}
-            title="Chat with Trainer"
-            style={{
-              bottom: '90px',
-              background: 'var(--warning, #f59e0b)'
-            }}
-          >
-            <MessageCircle size={24} />
-            {unreadCount > 0 && (
-              <div style={{
-                position: 'absolute', top: -2, right: -2, background: 'var(--danger, #ef4444)',
-                color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', borderRadius: '50%',
-                width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-              }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </div>
-            )}
-          </button>
+          
+          {user?.role !== 'admin' && (
+            <button
+              className="chatbot-fab"
+              onClick={() => {
+                if (location.pathname === '/messages') {
+                  navigate('/home');
+                } else {
+                  navigate('/messages');
+                }
+              }}
+              title="Chat with Trainer"
+              style={{
+                bottom: '90px',
+                background: 'var(--warning, #f59e0b)'
+              }}
+            >
+              <MessageCircle size={24} />
+              {unreadCount > 0 && (
+                <div style={{
+                  position: 'absolute', top: -2, right: -2, background: 'var(--danger, #ef4444)',
+                  color: '#fff', fontSize: '0.7rem', fontWeight: 'bold', borderRadius: '50%',
+                  width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </div>
+              )}
+            </button>
+          )}
         </>
       )}
 
