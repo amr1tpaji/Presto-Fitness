@@ -60,6 +60,7 @@ function AdminLayout() {
 }
 
 import Chatbot from './components/common/Chatbot';
+import RoamingKitty from './components/common/RoamingKitty';
 import './styles/chatbot.css'; // Import the new Chatbot CSS
 
 function ClientLayout() {
@@ -70,7 +71,7 @@ function ClientLayout() {
       <main className="client-main">
         <Outlet />
       </main>
-      <Chatbot />
+      <RoamingKitty />
     </div>
   );
 }

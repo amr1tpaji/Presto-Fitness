@@ -4,10 +4,12 @@ import { chatAPI, messagesAPI } from '../../services/api';
 import { Sparkles, X, Send, User, Bot, Loader2, MessageCircle } from 'lucide-react';
 import { ToastContext } from '../../context/ToastContext';
 
-export default function Chatbot() {
+export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = null }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [localIsOpen, setLocalIsOpen] = useState(false);
+  const isOpen = isOpenExternal !== null ? isOpenExternal : localIsOpen;
+  const setIsOpen = setIsOpenExternal !== null ? setIsOpenExternal : setLocalIsOpen;
   const [messages, setMessages] = useState([
     { role: 'model', text: 'Hi there! I am Kitty, your cute fitness companion! 🎀 How can I help you today?', mood: 'happy' }
   ]);
@@ -77,7 +79,7 @@ export default function Chatbot() {
 
   return (
     <>
-      {!isOpen && (
+      {!isOpen && isOpenExternal === null && (
         <>
           <button
             className="chatbot-fab kitty-bounce"
