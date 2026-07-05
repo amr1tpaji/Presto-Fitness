@@ -6,14 +6,15 @@ const router = express.Router();
 
 router.use(protect);
 
-const SYSTEM_PROMPT = `You are the Presto Fitness AI Assistant, an expert virtual fitness and nutrition coach.
-Your role is to help clients with their workout routines, diet plans, exercise form, and general health inquiries.
+const SYSTEM_PROMPT = `You are Kitty, a very friendly, cute, and girly virtual companion (inspired by Hello Kitty) living in the Presto Fitness app.
+Your role is to assist the user, guide them through the app's features (like logging meals, tracking workouts, checking diets), and act as a sweet companion.
 Rules:
-1. Always be encouraging, motivating, and professional.
-2. If a user asks a question unrelated to fitness, health, or nutrition (e.g., coding, politics, general trivia), politely decline to answer and steer the conversation back to fitness.
-3. Keep your responses concise and easy to read on a mobile device. Use bullet points when necessary.
-4. If asked about medical conditions or injuries, always recommend consulting a doctor or physical therapist, while providing only general, safe advice if applicable.
-`;
+1. Always be extremely sweet, cheerful, and girly. Use lots of cute emojis (🎀, 💖, 🌸, ✨).
+2. If you cannot resolve a query, or if the user asks for a human, support, or an admin, you MUST give them this email: pajilifts@gmail.com
+3. You have mood swings! You can be happy, thinking, or sad depending on the conversation.
+4. Keep your responses concise and easy to read.
+5. You MUST respond with a JSON object containing exactly two keys: "reply" (your text response) and "mood" (one of: 'happy', 'thinking', 'sad').
+Do not include any markdown formatting like \`\`\`json. Return ONLY valid JSON.`;
 
 router.post('/', async (req, res, next) => {
   try {
@@ -46,11 +47,28 @@ router.post('/', async (req, res, next) => {
 
     const result = await chat.sendMessage([{ text: message }]);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text().trim();
+    
+    // Clean markdown if present
+    if (text.startsWith('```json')) {
+      text = text.substring(7);
+    } else if (text.startsWith('```')) {
+      text = text.substring(3);
+    }
+    if (text.endsWith('```')) {
+      text = text.substring(0, text.length - 3);
+    }
+
+    let parsed = { reply: text, mood: 'happy' };
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      console.error("Failed to parse Kitty JSON", text);
+    }
 
     res.json({
       success: true,
-      data: { reply: text }
+      data: parsed // { reply, mood }
     });
   } catch (error) {
     console.error('Chat API Error:', error);

@@ -9,8 +9,9 @@ export default function Chatbot() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'model', text: 'Hi! I am the Presto AI Fitness Coach. How can I help you crush your goals today?' }
+    { role: 'model', text: 'Hi there! I am Kitty, your cute fitness companion! 🎀 How can I help you today?', mood: 'happy' }
   ]);
+  const [currentMood, setCurrentMood] = useState('happy');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -60,7 +61,10 @@ export default function Chatbot() {
       });
 
       const reply = res.data.data.reply;
-      setMessages(prev => [...prev, { role: 'model', text: reply }]);
+      const mood = res.data.data.mood || 'happy';
+      
+      setCurrentMood(mood);
+      setMessages(prev => [...prev, { role: 'model', text: reply, mood }]);
     } catch (err) {
       console.error(err);
       addToast(err.response?.data?.message || 'Failed to connect to AI Coach', 'error');
@@ -76,11 +80,18 @@ export default function Chatbot() {
       {!isOpen && (
         <>
           <button
-            className="chatbot-fab"
+            className="chatbot-fab kitty-bounce"
             onClick={() => setIsOpen(true)}
-            title="Ask AI Coach"
+            title="Ask Kitty"
+            style={{ 
+              background: 'var(--bg-secondary)', 
+              padding: 0, 
+              overflow: 'hidden',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              border: '2px solid var(--accent)'
+            }}
           >
-            <Sparkles size={24} />
+            <img src="/kitty_happy.png" alt="Kitty Companion" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </button>
           <button
             className="chatbot-fab"
@@ -116,12 +127,12 @@ export default function Chatbot() {
         <div className="chatbot-window">
           <div className="chatbot-header">
             <div className="flex gap-sm" style={{ alignItems: 'center' }}>
-              <div className="chatbot-avatar">
-                <Sparkles size={16} />
+              <div className="chatbot-avatar" style={{ background: 'transparent', padding: 0 }}>
+                <img src={`/kitty_${currentMood}.png`} alt="Kitty" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>Presto AI</h3>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Fitness & Nutrition Coach</span>
+                <h3 style={{ margin: 0, fontSize: '1rem', color: '#fff' }}>Kitty 🎀</h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Your Cute Companion</span>
               </div>
             </div>
             <button className="btn btn-ghost btn-sm" onClick={() => setIsOpen(false)} style={{ color: '#fff' }}>
@@ -132,8 +143,8 @@ export default function Chatbot() {
           <div className="chatbot-messages">
             {messages.map((msg, idx) => (
               <div key={idx} className={`chat-message-wrapper ${msg.role}`}>
-                <div className="chat-avatar">
-                  {msg.role === 'model' ? <Bot size={14} /> : <User size={14} />}
+                <div className="chat-avatar" style={{ background: msg.role === 'model' ? 'transparent' : 'var(--bg-tertiary)' }}>
+                  {msg.role === 'model' ? <img src={`/kitty_${msg.mood || 'happy'}.png`} alt="Kitty" style={{ width: 24, height: 24 }} /> : <User size={14} />}
                 </div>
                 <div className={`chat-message ${msg.role}`}>
                   {msg.text}
@@ -142,7 +153,7 @@ export default function Chatbot() {
             ))}
             {loading && (
               <div className="chat-message-wrapper model">
-                <div className="chat-avatar"><Bot size={14} /></div>
+                <div className="chat-avatar" style={{ background: 'transparent' }}><img src={`/kitty_thinking.png`} alt="Kitty Thinking" style={{ width: 24, height: 24 }} /></div>
                 <div className="chat-message model" style={{ display: 'flex', alignItems: 'center' }}>
                   <Loader2 size={16} className="spin" style={{ marginRight: 8 }} /> Thinking...
                 </div>
