@@ -40,8 +40,9 @@ export default function MealLogger() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validItems = items.filter((item) => item.food.trim());
-    if (validItems.length === 0) {
-      addToast('Please add at least one food item', 'error');
+    
+    if (validItems.length === 0 && !comment.trim() && !photoFile) {
+      addToast('Please add at least one food item, a photo, or a comment', 'error');
       return;
     }
 
@@ -65,11 +66,14 @@ export default function MealLogger() {
         formData.append('file', photoFile); // "file" matches backend uploadSingle field
       }
 
-      await mealsAPI.log(formData);
+      const response = await mealsAPI.log(formData);
       addToast('Meal logged successfully! 🎉', 'success');
       
+      // Get the items that were actually saved (in case AI generated them)
+      const savedItems = response.data?.data?.mealLog?.items || validItems;
+      
       // Trigger Kitty feedback!
-      window.dispatchEvent(new CustomEvent('MEAL_LOGGED', { detail: { items: validItems } }));
+      window.dispatchEvent(new CustomEvent('MEAL_LOGGED', { detail: { items: savedItems } }));
       
       setItems([emptyFoodItem()]);
       setComment('');
