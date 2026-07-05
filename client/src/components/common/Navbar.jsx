@@ -1,13 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { ChevronDown, User, Settings, LogOut, Menu, X } from 'lucide-react';
+import { ThemeContext } from '../../context/ThemeContext';
+import { ChevronDown, User, Settings, LogOut, Menu, X, Sun, Moon } from 'lucide-react';
 import { APP_NAME } from '../../utils/constants';
 
 import { getImageUrl } from '../../services/api';
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -42,7 +44,15 @@ export default function Navbar() {
         </Link>
       </div>
 
-      <div className="navbar-right">
+      <div className="navbar-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <button 
+          onClick={toggleTheme}
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: '50%', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, transition: 'all 0.2s ease' }}
+          title="Toggle Theme"
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+
         <div className="navbar-user" ref={dropdownRef}>
           <button
             className="navbar-user-btn"

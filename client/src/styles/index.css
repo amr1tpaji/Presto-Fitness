@@ -52,6 +52,26 @@ html {
   --navbar-height: 64px;
 }
 
+:root[data-theme="light"] {
+  --bg-primary: #f6f8fa;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-elevated: #f3f4f6;
+  --bg-input: #ffffff;
+  --accent: #00a884;
+  --accent-hover: #008f6f;
+  --accent-subtle: rgba(0, 168, 132, 0.1);
+  --accent-glow: rgba(0, 168, 132, 0.2);
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --text-muted: #8c959f;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-hover: rgba(0, 0, 0, 0.18);
+  
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
 /* ===== Base Styles ===== */
 body {
   font-family: var(--font);
