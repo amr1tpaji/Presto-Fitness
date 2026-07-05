@@ -52,6 +52,10 @@ const mealLogSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    aiRemarks: {
+      type: String,
+      trim: true,
+    },
     isOnPlan: {
       type: Boolean,
       default: true,

@@ -37,9 +37,10 @@ const logMealTool = {
           totalCalories: { type: 'NUMBER', description: 'Sum of all item calories' },
           totalProtein: { type: 'NUMBER', description: 'Sum of all item protein' },
           totalCarbs: { type: 'NUMBER', description: 'Sum of all item carbs' },
-          totalFats: { type: 'NUMBER', description: 'Sum of all item fats' }
+          totalFats: { type: 'NUMBER', description: 'Sum of all item fats' },
+          aiRemarks: { type: 'STRING', description: 'Detailed remarks on the meal, including analysis of how balanced it is and necessary adjustments the user should make for a healthier diet.' }
         },
-        required: ['items', 'totalCalories', 'totalProtein', 'totalCarbs', 'totalFats']
+        required: ['items', 'totalCalories', 'totalProtein', 'totalCarbs', 'totalFats', 'aiRemarks']
       }
     }
   ]
@@ -71,7 +72,8 @@ router.post(
         systemInstruction: `You are a strict fitness and nutrition AI assistant. 
 When a user uploads a food photo or describes a meal without explicitly stating the exact quantities or portion sizes (e.g., "I ate this", "a bowl of rice", "chicken"), YOU MUST NOT call the log_meal function immediately. 
 Instead, you MUST reply with a friendly question asking for the exact quantity or portion size (e.g. "How many grams was the chicken?", "Was it a small or large bowl?"). 
-Only call the log_meal function when you are reasonably confident about the exact quantities.`
+Only call the log_meal function when you are reasonably confident about the exact quantities.
+When you call log_meal, you MUST include 'aiRemarks' explaining to the user if their meal is balanced, and provide constructive adjustments for their next meal.`
       });
 
       const chatSession = model.startChat({
@@ -152,6 +154,7 @@ Only call the log_meal function when you are reasonably confident about the exac
           totalProtein: args.totalProtein,
           totalCarbs: args.totalCarbs,
           totalFats: args.totalFats,
+          aiRemarks: args.aiRemarks,
         });
 
         return res.json({
@@ -159,7 +162,7 @@ Only call the log_meal function when you are reasonably confident about the exac
           data: {
             isFunctionCall: true,
             mealLog,
-            text: 'I have successfully logged your meal! 💪'
+            text: 'I have successfully logged your meal! 💪\n\n' + args.aiRemarks
           }
         });
       } else {

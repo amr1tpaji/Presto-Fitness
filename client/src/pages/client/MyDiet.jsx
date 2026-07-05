@@ -1,21 +1,26 @@
 import { useState, useEffect, useContext, useMemo, useCallback } from 'react';
-import { dietsAPI } from '../../services/api';
+import { dietsAPI, mealsAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import DietView from '../../components/client/DietView';
 import Loader from '../../components/common/Loader';
-import { UtensilsCrossed } from 'lucide-react';
+import { UtensilsCrossed, Sparkles } from 'lucide-react';
 import '../../styles/client.css';
 
 export default function MyDiet() {
   const { addToast } = useContext(ToastContext);
   const [dietPlan, setDietPlan] = useState(null);
+  const [loggedMeals, setLoggedMeals] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDiet = useCallback(async () => {
     try {
-      const res = await dietsAPI.getAll();
+      const [res, mealsRes] = await Promise.all([
+        dietsAPI.getAll(),
+        mealsAPI.getToday()
+      ]);
       const plans = res.data?.dietPlans || res.data || [];
       setDietPlan(plans.length > 0 ? plans[0] : null);
+      setLoggedMeals(mealsRes.data?.data?.mealLogs || []);
     } catch (err) {
       addToast('Failed to load diet plan', 'error');
     } finally {
@@ -101,6 +106,69 @@ export default function MyDiet() {
       )}
 
       <DietView dietPlan={dietPlan} />
+
+      {/* Today's Logged Meals Section */}
+      <div style={{ marginTop: '3rem' }}>
+        <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Sparkles size={20} className="text-accent" /> Today's Logged Meals
+        </h2>
+        
+        {loggedMeals.length === 0 ? (
+          <div className="empty-state card">
+            <UtensilsCrossed size={32} />
+            <p>You haven't logged any meals today.</p>
+          </div>
+        ) : (
+          <div className="flex-col gap-md">
+            {loggedMeals.map((meal, idx) => (
+              <div key={meal._id || idx} className="card">
+                <div className="card-header flex flex-between" style={{ alignItems: 'center', padding: '16px' }}>
+                  <h3 style={{ margin: 0, fontSize: '1rem' }}>{meal.mealType || 'Meal'}</h3>
+                  <span className="text-muted" style={{ fontSize: '0.85rem' }}>
+                    {new Date(meal.date || meal.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                
+                <div className="card-body" style={{ padding: '16px' }}>
+                  {meal.photo && (
+                    <div style={{ marginBottom: '1rem', borderRadius: 'var(--radius-sm)', overflow: 'hidden', height: 180 }}>
+                      <img src={getImageUrl(meal.photo)} alt="Meal" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  )}
+
+                  <div className="flex-col gap-sm" style={{ marginBottom: '1.5rem' }}>
+                    {(meal.items || []).map((item, i) => (
+                      <div key={i} className="flex flex-between" style={{ fontSize: '0.9rem', paddingBottom: 8, borderBottom: '1px solid var(--border)' }}>
+                        <div>
+                          <span style={{ fontWeight: 600 }}>{item.food}</span>
+                          <span className="text-muted" style={{ marginLeft: 8 }}>({item.quantity} {item.unit})</span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span style={{ fontWeight: 600, color: 'var(--accent)' }}>{item.calories} kcal</span>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                            P: {item.protein}g | C: {item.carbs}g | F: {item.fats}g
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {meal.aiRemarks && (
+                    <div style={{ background: 'var(--accent-subtle)', border: '1px solid var(--accent)', borderRadius: 'var(--radius-sm)', padding: '1rem' }}>
+                      <h4 style={{ margin: '0 0 0.5rem', color: 'var(--accent)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Sparkles size={16} /> AI Remarks & Adjustments
+                      </h4>
+                      <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                        {meal.aiRemarks}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
