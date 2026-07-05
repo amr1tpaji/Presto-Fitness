@@ -3,7 +3,7 @@ const { body, validationResult } = require('express-validator');
 const MealLog = require('../models/MealLog');
 const { protect, adminOnly } = require('../middleware/auth');
 const { uploadSingle } = require('../middleware/upload');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const fs = require('fs');
 
 const router = express.Router();
@@ -31,52 +31,28 @@ router.post('/', (req, res, next) => {
         items = [];
       }
 
-      // ── Gemini AI Integration ──
-      // If we don't have items provided manually, but we have a photo or a comment, let Gemini guess them!
-      if (items.length === 0 && process.env.GEMINI_API_KEY && (req.file || req.body.comment)) {
+      // ── Groq AI Integration ──
+      // If we don't have items provided manually, but we have a comment, let Groq guess them!
+      if (items.length === 0 && process.env.GROQ_API_KEY && req.body.comment) {
         try {
-          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+          const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
           
-          let imageBase64 = null;
-          let mimeType = null;
-          
-          if (req.file) {
-            mimeType = req.file.mimetype;
-            if (req.file.path && req.file.path.startsWith('http')) {
-              // Cloudinary URL: Fetch image and convert to base64
-              const imgRes = await fetch(req.file.path);
-              const arrayBuffer = await imgRes.arrayBuffer();
-              imageBase64 = Buffer.from(arrayBuffer).toString('base64');
-            } else {
-              // Local File Storage
-              imageBase64 = fs.readFileSync(req.file.path, 'base64');
-            }
-          }
-
-          const prompt = `Analyze this meal.
-Comment from user: "${req.body.comment || 'No comment provided'}"
-Identify the food items in the image and comment, estimate the quantity, and estimate the calories, protein, carbs, and fats for each item.
+          const prompt = `Analyze this meal based on the user's comment: "${req.body.comment}"
+Identify the food items, estimate the quantity, and estimate the calories, protein, carbs, and fats for each item.
 Return ONLY a valid JSON array of objects, with each object having exactly these keys: food, quantity, unit, calories, protein, carbs, fats.
 Important: 'calories', 'protein', 'carbs', and 'fats' MUST be numbers. 'food', 'quantity', and 'unit' MUST be strings.
 Example: [{"food": "Chicken Breast", "quantity": "150", "unit": "g", "calories": 248, "protein": 46, "carbs": 0, "fats": 5}]
-Do not include any markdown formatting like \`\`\`json or \`\`\`. Just output the raw JSON array.`;
+Do not include any markdown formatting.`;
 
-          const parts = [{ text: prompt }];
-          if (imageBase64) {
-            parts.push({
-              inlineData: {
-                data: imageBase64,
-                mimeType: mimeType
-              }
-            });
-          }
+          const chatCompletion = await groq.chat.completions.create({
+            messages: [{ role: 'system', content: prompt }],
+            model: 'llama3-8b-8192',
+            response_format: { type: 'json_object' }
+          });
 
-          const result = await model.generateContent({ contents: [{ role: 'user', parts }] });
-          const response = await result.response;
-          let text = response.text().trim();
+          let text = chatCompletion.choices[0]?.message?.content?.trim() || "[]";
           
-          // Cleanup markdown if Gemini includes it despite instructions
+          // Cleanup markdown if Groq includes it despite instructions
           if (text.startsWith('```json')) {
             text = text.substring(7);
           } else if (text.startsWith('```')) {
@@ -85,8 +61,21 @@ Do not include any markdown formatting like \`\`\`json or \`\`\`. Just output th
           if (text.endsWith('```')) {
             text = text.substring(0, text.length - 3);
           }
-
-          const parsedItems = JSON.parse(text);
+          
+          // Note: Groq JSON mode returns an object, so the array might be wrapped like {"items": [...]}
+          let parsedItems = [];
+          try {
+            const parsed = JSON.parse(text);
+            if (Array.isArray(parsed)) {
+              parsedItems = parsed;
+            } else if (parsed && Array.isArray(parsed.items)) {
+              parsedItems = parsed.items;
+            } else if (parsed && Array.isArray(parsed.meals)) {
+              parsedItems = parsed.meals;
+            }
+          } catch (parseErr) {
+            console.error("Failed to parse Groq output:", text);
+          }
           if (Array.isArray(parsedItems)) {
             items = parsedItems.map(item => ({
               food: String(item.food || 'Unknown Food'),
