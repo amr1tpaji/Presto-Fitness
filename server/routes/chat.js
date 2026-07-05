@@ -117,12 +117,13 @@ router.post('/', async (req, res, next) => {
       const options = {
         messages: messagesArray,
         model: 'llama-3.3-70b-versatile',
-        response_format: { type: 'json_object' }
       };
 
       if (req.user.role === 'admin') {
         options.tools = adminTools;
         options.tool_choice = "auto";
+      } else {
+        options.response_format = { type: 'json_object' };
       }
 
       const chatCompletion = await groq.chat.completions.create(options);
