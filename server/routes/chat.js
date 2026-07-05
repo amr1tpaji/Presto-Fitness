@@ -1,5 +1,5 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -36,8 +36,8 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Message is required' });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ success: false, message: 'Gemini API key is not configured on the server.' });
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({ success: false, message: 'Groq API key is not configured on the server.' });
     }
 
     let dynamicContext = "";
@@ -52,26 +52,27 @@ router.post('/', async (req, res, next) => {
 
     const basePrompt = req.user.role === 'admin' ? ADMIN_SYSTEM_PROMPT : CLIENT_SYSTEM_PROMPT;
     
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
-      systemInstruction: basePrompt + dynamicContext
-    });
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-    // Format history for Gemini API
-    // Gemini expects history as: [{ role: 'user', parts: [{text: '...'}] }, { role: 'model', parts: [{text: '...'}] }]
+    // Format history for Groq API (OpenAI format)
     const formattedHistory = (history || []).map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.text }]
+      role: msg.role === 'user' ? 'user' : 'assistant', // Groq uses 'assistant' instead of 'model'
+      content: msg.text
     }));
 
-    const chat = model.startChat({
-      history: formattedHistory,
+    const messagesArray = [
+      { role: 'system', content: basePrompt + dynamicContext },
+      ...formattedHistory,
+      { role: 'user', content: message }
+    ];
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: messagesArray,
+      model: 'llama3-8b-8192',
+      response_format: { type: 'json_object' }
     });
 
-    const result = await chat.sendMessage([{ text: message }]);
-    const response = await result.response;
-    let text = response.text().trim();
+    let text = chatCompletion.choices[0]?.message?.content?.trim() || "";
     
     // Clean markdown if present
     if (text.startsWith('```json')) {
