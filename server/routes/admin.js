@@ -172,17 +172,19 @@ router.delete('/clients/:id', async (req, res, next) => {
     const LabReport = require('../models/LabReport');
     const MealLog = require('../models/MealLog');
     const Reward = require('../models/Reward');
+    const Message = require('../models/Message');
 
     // Cascade Delete all user data
     await Promise.all([
       WeightLog.deleteMany({ userId: clientId }),
-      Workout.deleteMany({ assignedTo: clientId }),
-      DietPlan.deleteMany({ assignedTo: clientId }),
+      Workout.updateMany({ assignedTo: clientId }, { $pull: { assignedTo: clientId } }),
+      DietPlan.updateMany({ assignedTo: clientId }, { $pull: { assignedTo: clientId } }),
       Payment.deleteMany({ userId: clientId }),
-      DailyTask.deleteMany({ assignedTo: clientId }),
+      DailyTask.deleteMany({ userId: clientId }),
       LabReport.deleteMany({ userId: clientId }),
       MealLog.deleteMany({ userId: clientId }),
       Reward.deleteMany({ userId: clientId }),
+      Message.deleteMany({ $or: [{ sender: clientId }, { receiver: clientId }] }),
     ]);
 
     // Finally delete the user
