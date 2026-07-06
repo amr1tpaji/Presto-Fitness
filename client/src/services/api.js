@@ -136,7 +136,9 @@ export const labsAPI = {
 
 // ===== Meals API =====
 export const mealsAPI = {
-  log: (data) => API.post('/meals', data),
+  log: (data) => API.post('/meals', data, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
   getAll: (params) => API.get('/meals', { params }),
   getToday: () => API.get('/meals/today'),
   getClientMeals: (clientId, params) => API.get(`/meals/client/${clientId}`, { params }),
