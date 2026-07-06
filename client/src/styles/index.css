@@ -19,10 +19,10 @@ html {
 /* ===== CSS Custom Properties ===== */
 :root {
   --bg-primary: #06080d;
-  --bg-secondary: #0d1117;
-  --bg-card: #131921;
-  --bg-elevated: #1a2332;
-  --bg-input: #0d1117;
+  --bg-secondary: rgba(13, 17, 23, 0.5);
+  --bg-card: rgba(19, 25, 33, 0.65);
+  --bg-elevated: rgba(26, 35, 50, 0.7);
+  --bg-input: rgba(13, 17, 23, 0.8);
   --accent: #00d4aa;
   --accent-hover: #00eabc;
   --accent-subtle: rgba(0, 212, 170, 0.08);
@@ -54,10 +54,10 @@ html {
 
 :root[data-theme="light"] {
   --bg-primary: #f6f8fa;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --bg-elevated: #f3f4f6;
-  --bg-input: #ffffff;
+  --bg-secondary: rgba(255, 255, 255, 0.5);
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-elevated: rgba(243, 244, 246, 0.8);
+  --bg-input: rgba(255, 255, 255, 0.9);
   --accent: #00a884;
   --accent-hover: #008f6f;
   --accent-subtle: rgba(0, 168, 132, 0.1);
@@ -76,12 +76,24 @@ html {
 body {
   font-family: var(--font);
   background-color: var(--bg-primary);
+  /* Human touch & Addictive UI background */
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(0, 212, 170, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(88, 166, 255, 0.08), transparent 25%);
+  background-size: 100vw 100vh;
+  background-attachment: fixed;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+  animation: pulseBg 12s infinite alternate ease-in-out;
+}
+
+@keyframes pulseBg {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
 
 #root {
@@ -296,15 +308,17 @@ p {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), #00a388);
   color: #06080d;
-  font-weight: 600;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 15px var(--accent-glow);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
-  box-shadow: 0 0 20px var(--accent-glow);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, var(--accent-hover), var(--accent));
+  box-shadow: 0 8px 25px var(--accent-glow), 0 0 15px rgba(0, 212, 170, 0.4);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -441,16 +455,20 @@ p {
 /* ===== Card Styles ===== */
 .card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .card:hover {
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  border-color: var(--accent-glow);
+  background: var(--bg-elevated);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 15px var(--accent-subtle);
 }
 
 .card.hoverable:hover {
@@ -479,6 +497,12 @@ p {
 .card-footer {
   padding: 16px 24px;
   border-top: 1px solid var(--border);
+}
+
+/* Global Glassmorphism Application */
+.card, .client-stat-card, .task-item, .quick-link, .exercise-view-card, .diet-meal-card, .meal-logger-card, .weight-history-item, .badge-card, .reward-item, .lab-report-card {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 /* ===== Badge Styles ===== */
