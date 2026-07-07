@@ -40,9 +40,13 @@ export default function MealLogger() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validItems = items.filter((item) => item.food.trim());
+    if (!photoFile) {
+      addToast('A photo is mandatory to log a meal', 'error');
+      return;
+    }
     
-    if (validItems.length === 0 && !comment.trim() && !photoFile) {
-      addToast('Please add at least one food item, a photo, or a comment', 'error');
+    if (validItems.length === 0 && !comment.trim()) {
+      addToast('Please add at least one food item or a comment', 'error');
       return;
     }
 
@@ -188,7 +192,7 @@ export default function MealLogger() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Photo (optional)</label>
+              <label className="form-label">Photo *</label>
               <input
                 type="file"
                 accept="image/*"

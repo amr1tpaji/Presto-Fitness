@@ -17,6 +17,10 @@ router.post('/', (req, res, next) => {
   uploadSingle(req, res, async (uploadErr) => {
     if (uploadErr) return next(uploadErr);
     
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'A photo is mandatory to log a meal' });
+    }
+    
     try {
       let items = req.body.items;
       if (items && typeof items === 'string') {
@@ -32,13 +36,13 @@ router.post('/', (req, res, next) => {
       }
 
       // ── Groq AI Integration ──
-      // If we don't have items provided manually, but we have a comment, let Groq guess them!
-      if (items.length === 0 && process.env.GROQ_API_KEY && req.body.comment) {
+      // Use Groq to estimate calories and macros for the items, or guess them from the comment if no items provided.
+      if (process.env.GROQ_API_KEY) {
         try {
           const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
           
-          const prompt = `Analyze this meal based on the user's comment: "${req.body.comment}"
-Identify the food items, estimate the quantity, and estimate the calories, protein, carbs, and fats for each item.
+          const prompt = `Analyze this meal based on the user's provided items: ${JSON.stringify(items)} and comment: "${req.body.comment || ''}".
+Estimate the calories, protein, carbs, and fats for each item. If the provided items array is empty, try to identify the food items and their quantities from the comment.
 Return ONLY a valid JSON array of objects, with each object having exactly these keys: food, quantity, unit, calories, protein, carbs, fats.
 Important: 'calories', 'protein', 'carbs', and 'fats' MUST be numbers. 'food', 'quantity', and 'unit' MUST be strings.
 Example: [{"food": "Chicken Breast", "quantity": "150", "unit": "g", "calories": 248, "protein": 46, "carbs": 0, "fats": 5}]
