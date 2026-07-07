@@ -195,7 +195,7 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
                   {msg.text}
                   {msg.imageUrl && (
                     <div style={{ marginTop: '8px' }}>
-                      <img src={msg.imageUrl} alt="Kitty's Selfie" style={{ maxWidth: '100%', borderRadius: '8px' }} />
+                      <img src={msg.imageUrl} alt="Kitty's Selfie" style={{ maxWidth: '100%', borderRadius: '8px' }} onError={(e) => { e.target.style.display = 'none'; }} />
                     </div>
                   )}
                 </div>
