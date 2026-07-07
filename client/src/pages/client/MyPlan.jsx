@@ -119,43 +119,14 @@ export default function MyPlan() {
           </div>
         )}
 
-        {/* Original PDF Preview */}
-        {user?.planPdf ? (
-          <div className="card" style={{ flexShrink: 0, height: '600px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
-            <div className="card-header flex flex-between" style={{ alignItems: 'center', flexShrink: 0, padding: '16px 24px', background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Info size={18} color="var(--accent)" /> Original PDF Document
-              </h3>
-              <a href={getImageUrl(user.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline" style={{ borderRadius: '100px' }}>
-                Open full screen
-              </a>
+        {!dietPlan && (
+          <div className="empty-state glass-card" style={{ marginTop: '2rem', padding: '60px 20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(0,212,170,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <FileText size={40} color="var(--accent)" />
             </div>
-            <div className="card-body" style={{ padding: 0, flex: 1 }}>
-              <object 
-                data={getImageUrl(user.planPdf)} 
-                type="application/pdf" 
-                width="100%" 
-                height="100%"
-                style={{ display: 'block', border: 'none' }}
-              >
-                <div style={{ padding: '2rem', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-card)' }}>
-                  <FileText size={48} color="var(--text-muted)" style={{ marginBottom: '16px' }} />
-                  <p style={{ color: 'var(--text-secondary)' }}>PDF preview not available in this browser.</p>
-                  <a href={getImageUrl(user.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ marginTop: '16px' }}>Download PDF</a>
-                </div>
-              </object>
-            </div>
+            <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>No plan assigned yet</h3>
+            <p className="text-muted" style={{ maxWidth: '400px', margin: '0 auto' }}>Your trainer hasn't uploaded your intelligent plan yet. Please check back later!</p>
           </div>
-        ) : (
-          !dietPlan && (
-            <div className="empty-state glass-card" style={{ marginTop: '2rem', padding: '60px 20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}>
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(0,212,170,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-                <FileText size={40} color="var(--accent)" />
-              </div>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>No plan assigned yet</h3>
-              <p className="text-muted" style={{ maxWidth: '400px', margin: '0 auto' }}>Your trainer hasn't uploaded your intelligent plan yet. Please check back later!</p>
-            </div>
-          )
         )}
       </div>
     </div>

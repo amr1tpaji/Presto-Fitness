@@ -388,11 +388,13 @@ export default function ClientDetail() {
 
           {client.planPdf && (
             <div className="card">
-              <div className="card-header flex flex-between" style={{ alignItems: 'center' }}>
-                <h3 style={{ margin: 0, fontSize: '1rem' }}>Current Plan Preview</h3>
+              <div className="card-header flex flex-between" style={{ alignItems: 'center', borderBottom: 'none' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={18} color="var(--success)" /> Active Plan
+                </h3>
                 <div className="flex gap-sm">
                   <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-ghost">
-                    Open in new tab
+                    Open original in new tab
                   </a>
                   <button 
                     className="btn btn-sm" 
@@ -412,19 +414,6 @@ export default function ClientDetail() {
                     Delete Plan
                   </button>
                 </div>
-              </div>
-              <div className="card-body" style={{ padding: 0, height: '800px', overflow: 'hidden' }}>
-                <object 
-                  data={getImageUrl(client.planPdf)} 
-                  type="application/pdf" 
-                  width="100%" 
-                  height="100%"
-                >
-                  <div style={{ padding: '2rem', textAlign: 'center' }}>
-                    <p>PDF preview not available in this browser.</p>
-                    <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Download PDF</a>
-                  </div>
-                </object>
               </div>
             </div>
           )}
