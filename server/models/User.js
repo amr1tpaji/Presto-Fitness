@@ -86,6 +86,10 @@ const userSchema = new mongoose.Schema(
       longestStreak: { type: Number, default: 0 },
       lastActivityDate: Date,
     },
+    hasCompletedTutorial: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

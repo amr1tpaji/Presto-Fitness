@@ -309,7 +309,7 @@ router.put('/profile', protect, (req, res, next) => {
     if (uploadErr) return next(uploadErr);
 
     try {
-      const { name, email, dateOfBirth, gender, height, goalWeight } = req.body;
+      const { name, email, dateOfBirth, gender, height, goalWeight, hasCompletedTutorial } = req.body;
       
       const updateData = {};
       if (name) updateData.name = name;
@@ -318,6 +318,7 @@ router.put('/profile', protect, (req, res, next) => {
       if (gender) updateData.gender = gender;
       if (height) updateData.height = Number(height);
       if (goalWeight) updateData.goalWeight = Number(goalWeight);
+      if (hasCompletedTutorial !== undefined) updateData.hasCompletedTutorial = hasCompletedTutorial === 'true' || hasCompletedTutorial === true;
       
       if (req.file) {
         updateData.avatar = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : req.file.filename;

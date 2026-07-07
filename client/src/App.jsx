@@ -30,6 +30,7 @@ import MyProgress from './pages/client/MyProgress';
 import MyRewards from './pages/client/MyRewards';
 import Profile from './pages/client/Profile';
 import Messages from './pages/client/Messages';
+import Tutorial from './pages/client/Tutorial';
 
 // Client bottom tab bar
 import { Home, Dumbbell, UtensilsCrossed, TrendingUp, Trophy } from 'lucide-react';
@@ -64,6 +65,12 @@ import Chatbot from './components/common/Chatbot';
 import './styles/chatbot.css'; // Import the new Chatbot CSS
 
 function ClientLayout() {
+  const { user } = useAuth();
+  
+  if (user && user.role === 'client' && !user.hasCompletedTutorial) {
+    return <Navigate to="/tutorial" replace />;
+  }
+
   return (
     <div className="client-layout">
       <Navbar />
@@ -114,6 +121,7 @@ export default function App() {
 
         {/* Client routes */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/tutorial" element={<Tutorial />} />
           <Route element={<ClientLayout />}>
             <Route path="/home" element={<ClientHome />} />
             <Route path="/meals/log" element={<LogMeal />} />
