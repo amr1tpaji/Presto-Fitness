@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { adminAPI, paymentsAPI, getImageUrl } from '../../services/api';
+import { adminAPI, paymentsAPI, dietsAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import LabReportUploader from '../../components/admin/LabReportUploader';
 import TaskManager from '../../components/admin/TaskManager';
@@ -12,7 +12,7 @@ import ChatUI from '../../components/common/ChatUI';
 import {
   ArrowLeft, User, Phone, Crown, Flame, Star,
   Activity, Dumbbell, UtensilsCrossed, FlaskConical,
-  ListChecks, CreditCard, CheckCircle2, XCircle, Trash2, MessageCircle, FileText, Upload
+  ListChecks, CreditCard, CheckCircle2, XCircle, Trash2, MessageCircle, FileText, Upload, Clock, Utensils
 } from 'lucide-react';
 
 const TABS = [
@@ -31,6 +31,7 @@ export default function ClientDetail() {
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [dietPlan, setDietPlan] = useState(null);
   const [labReports, setLabReports] = useState([]);
   const [payments, setPayments] = useState([]);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -388,14 +389,11 @@ export default function ClientDetail() {
 
           {client.planPdf && (
             <div className="card">
-              <div className="card-header flex flex-between" style={{ alignItems: 'center', borderBottom: 'none' }}>
+              <div className="card-header flex flex-between" style={{ alignItems: 'center', borderBottom: client.dietPlan ? '1px solid var(--border)' : 'none' }}>
                 <h3 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <CheckCircle2 size={18} color="var(--success)" /> Active Plan
                 </h3>
                 <div className="flex gap-sm">
-                  <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-ghost">
-                    Open original in new tab
-                  </a>
                   <button 
                     className="btn btn-sm" 
                     style={{ background: 'var(--danger-subtle)', color: 'var(--danger)', border: 'none' }}
@@ -415,6 +413,56 @@ export default function ClientDetail() {
                   </button>
                 </div>
               </div>
+              {client.dietPlan && (
+                <div className="card-body">
+                   <div style={{ display: 'flex', gap: '16px', background: 'rgba(0, 212, 170, 0.1)', padding: '12px 20px', borderRadius: '100px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                       <Flame size={16} color="var(--danger)" />
+                       <span style={{ fontWeight: '600' }}>{client.dietPlan.totalCalories}</span> kcal
+                     </div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#58a6ff' }}></div>
+                       <span style={{ fontWeight: '600' }}>{client.dietPlan.totalProtein}g</span> P
+                     </div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--warning)' }}></div>
+                       <span style={{ fontWeight: '600' }}>{client.dietPlan.totalFats}g</span> F
+                     </div>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }}></div>
+                       <span style={{ fontWeight: '600' }}>{client.dietPlan.totalCarbs}g</span> C
+                     </div>
+                   </div>
+
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                     {client.dietPlan.meals?.map((meal, idx) => (
+                       <div key={idx} style={{ padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                           <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                             <Utensils size={14} color="var(--accent)" /> {meal.name}
+                           </h4>
+                           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                             <Clock size={12} /> {meal.time}
+                           </span>
+                         </div>
+                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                           {meal.items?.map((item, i) => (
+                             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                               <div>
+                                 <span style={{ fontWeight: '500' }}>{item.food}</span>
+                                 <span style={{ color: 'var(--text-muted)', marginLeft: '8px', fontSize: '0.8rem' }}>{item.quantity}</span>
+                               </div>
+                               <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                                 {item.calories} cal | {item.protein}P {item.fats}F {item.carbs}C
+                               </div>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                </div>
+              )}
             </div>
           )}
         </div>
