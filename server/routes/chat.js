@@ -127,7 +127,6 @@ router.post('/', async (req, res, next) => {
       } else {
         options.response_format = { type: 'json_object' };
       }
-      options.response_format = { type: 'json_object' };
 
       const chatCompletion = await groq.chat.completions.create(options);
       const responseMessage = chatCompletion.choices[0]?.message;
@@ -179,14 +178,10 @@ router.post('/', async (req, res, next) => {
     }
     
     // Clean markdown if present
-    let text = finalResponseText;
-    if (text.startsWith('```json')) {
-      text = text.substring(7);
-    } else if (text.startsWith('```')) {
-      text = text.substring(3);
-    }
-    if (text.endsWith('```')) {
-      text = text.substring(0, text.length - 3);
+    let text = finalResponseText.trim();
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (jsonMatch) {
+      text = jsonMatch[1].trim();
     }
 
     let parsed = { reply: text, mood: 'happy' };
