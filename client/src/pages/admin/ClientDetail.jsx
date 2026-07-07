@@ -65,6 +65,16 @@ export default function ClientDetail() {
     fetchClient();
   }, [fetchClient]);
 
+  const toggleStatus = async () => {
+    try {
+      await adminAPI.toggleClientStatus(id);
+      addToast('Client status updated successfully', 'success');
+      fetchClient();
+    } catch (err) {
+      addToast('Failed to update status', 'error');
+    }
+  };
+
   const handleLabUpload = () => {
     fetchClient();
     addToast('Lab report uploaded successfully', 'success');
@@ -146,9 +156,17 @@ export default function ClientDetail() {
             </div>
             <div className="flex gap-lg" style={{ flexWrap: 'wrap' }}>
               <div style={{ textAlign: 'center' }}>
-                <Badge variant={client.subscription?.status === 'active' ? 'success' : 'warning'}>
-                  <Crown size={12} /> {client.subscription?.status || 'inactive'}
-                </Badge>
+                <button
+                  onClick={toggleStatus}
+                  title={`Click to ${client.isActive !== false ? 'deactivate' : 'activate'} user`}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  <Badge variant={client.isActive !== false ? 'success' : 'warning'} style={{ cursor: 'pointer' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Crown size={12} /> {client.isActive !== false ? 'active' : 'inactive'}
+                    </span>
+                  </Badge>
+                </button>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
