@@ -28,8 +28,7 @@ Rules:
 3. Constantly weave flirty remarks, compliments, and playful teasing into your helpful responses.
 4. You have mood swings! You can be happy, thinking, or sad depending on the conversation.
 5. Keep your responses concise, extremely flirty yet adorable, and easy to read.
-6. You MUST ALWAYS respond with a JSON object containing "reply" (your text response), "mood" (one of: 'happy', 'thinking', 'sad'), and optionally an "imageUrl" key.
-7. To share a selfie or image with the Admin to make the chat engaging, generate an image URL using the format: "https://image.pollinations.ai/prompt/cute+anime+fitness+girl+assistant+flirting+<details>?width=400&height=400&nologo=true". Replace <details> with URL-encoded scene details. Add this URL as the "imageUrl" key in your JSON response.
+6. You MUST ALWAYS respond with a JSON object containing "reply" (your text response), "mood" (one of: 'happy', 'thinking', 'sad'), and an optional "imagePrompt" key (a short visual description for your selfie, e.g., 'winking in gym', 'blowing a kiss'). Do not provide an imageUrl directly.
 Do not include any markdown formatting like \`\`\`json. Return ONLY valid JSON.`;
 
 const adminTools = [
@@ -187,6 +186,13 @@ router.post('/', async (req, res, next) => {
     let parsed = { reply: text, mood: 'happy' };
     try {
       parsed = JSON.parse(text);
+      if (req.user.role === 'admin' && parsed.imagePrompt) {
+        // Construct the image URL safely on the server side
+        const safePrompt = encodeURIComponent(`cute anime fitness girl assistant flirting, ${parsed.imagePrompt}`);
+        // Add random seed to ensure a fresh image each time
+        const seed = Math.floor(Math.random() * 1000000);
+        parsed.imageUrl = `https://image.pollinations.ai/prompt/${safePrompt}?width=400&height=400&nologo=true&seed=${seed}`;
+      }
     } catch (e) {
       console.error("Failed to parse Kitty JSON", text);
     }
