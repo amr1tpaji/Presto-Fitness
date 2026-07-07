@@ -36,6 +36,8 @@ const app = express();
 // Security headers
 app.use(helmet({ 
   crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false,
+  frameguard: false,
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],

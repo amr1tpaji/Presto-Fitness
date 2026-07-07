@@ -198,11 +198,15 @@ export const getImageUrl = (filename) => {
   if (filename.startsWith('http')) return filename;
   
   const apiUrl = import.meta.env.VITE_API_URL;
+  let baseUrl = '';
   if (apiUrl) {
-    const baseUrl = apiUrl.replace(/\/api$/, '');
-    return `${baseUrl}/uploads/${filename}`;
+    baseUrl = apiUrl.replace(/\/api$/, '');
   }
-  return `/uploads/${filename}`;
+
+  if (filename.startsWith('/')) {
+    return `${baseUrl}${filename}`;
+  }
+  return `${baseUrl}/uploads/${filename}`;
 };
 
 export default API;
