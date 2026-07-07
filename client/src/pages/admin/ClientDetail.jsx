@@ -353,10 +353,12 @@ export default function ClientDetail() {
 
       {activeTab === 'plan' && (
         <div className="flex-col gap-lg">
-          <div className="card">
-            <div className="card-header">
-              <h3 style={{ margin: 0, fontSize: '1rem' }}>Upload Plan (PDF)</h3>
-              <p className="text-muted" style={{ fontSize: '0.85rem', margin: '0.25rem 0 0' }}>Upload a comprehensive workout and diet plan as a PDF file.</p>
+          <div className="card glass-card" style={{ padding: '24px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="card-header" style={{ marginBottom: '16px', borderBottom: 'none' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <FileText color="var(--accent)" /> Intelligent Plan Upload (PDF)
+              </h3>
+              <p className="text-muted" style={{ fontSize: '0.9rem', margin: '0.5rem 0 0' }}>Upload a diet plan PDF. Our AI engine will automatically read, parse, and structure the data (Protein, Fats, Carbs, Timings) for the client's intelligent view.</p>
             </div>
             <div className="card-body">
               <div 

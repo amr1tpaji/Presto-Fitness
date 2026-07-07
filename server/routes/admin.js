@@ -6,6 +6,9 @@ const DietPlan = require('../models/DietPlan');
 const Payment = require('../models/Payment');
 const { protect, adminOnly } = require('../middleware/auth');
 const { uploadSingle } = require('../middleware/upload');
+const Groq = require('groq-sdk');
+const pdfParse = require('pdf-parse');
+const fs = require('fs');
 
 const router = express.Router();
 
@@ -179,10 +182,91 @@ router.post('/clients/:id/plan-pdf', uploadSingle, async (req, res, next) => {
 
     client.planPdf = fileUrl;
     await client.save();
+    
+    // Read PDF and extract text
+    let pdfBuffer;
+    if (req.file.path.startsWith('http')) {
+      const response = await fetch(req.file.path);
+      const arrayBuffer = await response.arrayBuffer();
+      pdfBuffer = Buffer.from(arrayBuffer);
+    } else {
+      pdfBuffer = fs.readFileSync(req.file.path);
+    }
+    
+    const pdfData = await pdfParse(pdfBuffer);
+    const pdfText = pdfData.text;
+
+    // Use Groq to parse Diet Plan from text
+    if (process.env.GROQ_API_KEY && pdfText && pdfText.trim().length > 0) {
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      const prompt = `You are a fitness data extraction assistant.
+Extract the diet plan from the following PDF text.
+Output ONLY a valid JSON object matching this exact schema:
+{
+  "title": "String (e.g. 'Custom Diet Plan')",
+  "totalCalories": Number,
+  "totalProtein": Number (in grams),
+  "totalCarbs": Number (in grams),
+  "totalFats": Number (in grams),
+  "meals": [
+    {
+      "name": "String (must be exactly one of: 'Breakfast', 'Lunch', 'Dinner', 'Snack', 'Pre-Workout', 'Post-Workout')",
+      "time": "String (e.g. '8:00 AM')",
+      "items": [
+        {
+          "food": "String (food name)",
+          "quantity": "String (e.g. '200g', '1 cup')",
+          "calories": Number,
+          "protein": Number,
+          "carbs": Number,
+          "fats": Number
+        }
+      ]
+    }
+  ]
+}
+If a value is not provided in the text, estimate reasonably or use 0. Do not wrap in markdown or backticks, just output raw JSON.
+
+PDF TEXT:
+${pdfText}`;
+
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'llama-3.3-70b-versatile',
+        response_format: { type: 'json_object' }
+      });
+
+      let aiResponse = chatCompletion.choices[0]?.message?.content || '{}';
+      
+      // Clean markdown if present
+      let text = aiResponse.trim();
+      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+      if (jsonMatch) {
+        text = jsonMatch[1].trim();
+      }
+
+      try {
+        const dietData = JSON.parse(text);
+        if (dietData.meals && dietData.meals.length > 0) {
+          // Deactivate current active diet plan
+          await DietPlan.updateMany({ assignedTo: client._id, isActive: true }, { isActive: false });
+          
+          const newDietPlan = new DietPlan({
+            ...dietData,
+            assignedTo: [client._id],
+            createdBy: req.user._id,
+            isActive: true,
+          });
+          await newDietPlan.save();
+        }
+      } catch (err) {
+        console.error("Failed to parse AI response for diet plan", text);
+      }
+    }
 
     res.json({
       success: true,
-      message: 'Plan PDF uploaded successfully',
+      message: 'Plan PDF uploaded and parsed successfully',
       data: { planPdf: fileUrl },
     });
   } catch (error) {
