@@ -80,7 +80,7 @@ router.get('/clients/:id', async (req, res, next) => {
 
     // Fetch associated data in parallel
     const DailyTask = require('../models/DailyTask');
-    const [recentWeightLogs, currentWorkout, currentDiet, recentTasksRecord] = await Promise.all([
+    const [recentWeightLogs, currentWorkout, currentDiet, recentTasksRecord, payments] = await Promise.all([
       WeightLog.find({ userId: client._id })
         .sort({ date: -1 })
         .limit(10),
@@ -99,6 +99,8 @@ router.get('/clients/:id', async (req, res, next) => {
           $lt: new Date(new Date().setHours(23, 59, 59, 999))
         }
       }),
+      Payment.find({ userId: client._id })
+        .sort({ paidAt: -1, createdAt: -1 })
     ]);
 
     res.json({
@@ -109,6 +111,7 @@ router.get('/clients/:id', async (req, res, next) => {
         currentWorkout,
         currentDiet,
         recentTasks: recentTasksRecord ? recentTasksRecord.tasks : [],
+        payments,
         completionRate: recentTasksRecord && recentTasksRecord.tasks.length > 0
           ? Math.round((recentTasksRecord.tasks.filter(t => t.isCompleted).length / recentTasksRecord.tasks.length) * 100)
           : 0,

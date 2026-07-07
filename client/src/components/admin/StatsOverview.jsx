@@ -39,7 +39,7 @@ export default function StatsOverview() {
     },
     {
       label: 'Revenue',
-      value: `₹${(stats?.revenue ?? 0).toLocaleString('en-IN')}`,
+      value: `₹${(stats?.totalRevenue ?? 0).toLocaleString('en-IN')}`,
       icon: <CreditCard size={24} />,
       color: 'var(--accent)',
       trend: stats?.revenueTrend,
