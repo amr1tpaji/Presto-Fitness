@@ -24,10 +24,12 @@ export default function WeightChart({ data = [], goalWeight }) {
     );
   }
 
-  const formatted = data.map(d => ({
-    ...d,
-    date: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-  }));
+  const formatted = [...data]
+    .sort((a, b) => new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt))
+    .map(d => ({
+      ...d,
+      date: new Date(d.date || d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    }));
 
   const weights = data.map(d => d.weight);
   const minW = Math.min(...weights);
