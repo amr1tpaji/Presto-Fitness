@@ -27,30 +27,13 @@ export default function DraggableSidebar() {
   const { isAdmin } = useAuth();
   const sidebarItems = isAdmin ? adminItems : clientItems;
   
-  // Responsive state
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
   // For mobile floating menu
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 150 });
 
-  // Handle window resize to keep button on screen
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-      setPosition(prev => ({
-        x: Math.min(prev.x, window.innerWidth - 60),
-        y: Math.min(prev.y, window.innerHeight - 60)
-      }));
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Desktop returns the standard fixed sidebar
-  if (!isMobile) {
-    return (
-      <aside className="sidebar open">
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="sidebar open hide-mobile">
         <div className="sidebar-section">Main</div>
         <nav className="sidebar-nav">
           {sidebarItems.map((item) => (
@@ -65,14 +48,10 @@ export default function DraggableSidebar() {
           ))}
         </nav>
       </aside>
-    );
-  }
 
-  return (
-    <>
-      {/* Fixed Menu Button at Top Left */}
+      {/* Mobile FAB */}
       <button 
-        className="draggable-fab"
+        className="draggable-fab hide-desktop"
         style={{
           left: '16px',
           top: '16px',
@@ -96,7 +75,7 @@ export default function DraggableSidebar() {
 
       {/* Floating Menu Popup */}
       {isOpen && (
-        <>
+        <div className="hide-desktop">
           <div className="draggable-menu-overlay" onClick={() => setIsOpen(false)} />
           <div 
             className="draggable-menu"
@@ -121,7 +100,7 @@ export default function DraggableSidebar() {
               ))}
             </nav>
           </div>
-        </>
+        </div>
       )}
     </>
   );

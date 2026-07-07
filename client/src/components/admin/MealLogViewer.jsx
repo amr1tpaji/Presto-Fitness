@@ -105,7 +105,7 @@ export default function MealLogViewer({ clientId }) {
                 <div className="grid grid-2 gap-lg" style={{ alignItems: 'start' }}>
                   
                   {/* Items List */}
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-secondary)' }}>Food Items</h4>
                     <div className="flex-col gap-sm">
                       {log.items && log.items.length > 0 ? log.items.map((item, i) => (
@@ -128,7 +128,7 @@ export default function MealLogViewer({ clientId }) {
                   </div>
 
                   {/* Sidebar (Photo & Comments) */}
-                  <div className="flex-col gap-md">
+                  <div className="flex-col gap-md" style={{ minWidth: 0, overflow: 'hidden' }}>
                     {log.photo ? (
                       <div>
                         <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-secondary)' }}>Attached Photo</h4>
