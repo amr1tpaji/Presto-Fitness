@@ -535,7 +535,7 @@ export default function ClientDetail() {
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Amount (₹)</label>
                   <input 
                     type="number" 
-                    className="input" 
+                    className="form-input" 
                     required 
                     value={paymentAmount}
                     onChange={(e) => setPaymentAmount(e.target.value)}
@@ -546,13 +546,13 @@ export default function ClientDetail() {
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Plan (optional)</label>
                   <input 
                     type="text" 
-                    className="input" 
+                    className="form-input" 
                     value={paymentPlan}
                     onChange={(e) => setPaymentPlan(e.target.value)}
                     placeholder="e.g. monthly"
                   />
                 </div>
-                <button type="submit" className="btn btn-primary" style={{ marginBottom: 2 }}>Save Payment</button>
+                <button type="submit" className="btn btn-primary" style={{ marginBottom: 4 }}>Save Payment</button>
               </form>
             </div>
           )}
