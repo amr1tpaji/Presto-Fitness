@@ -66,9 +66,10 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
 
       const reply = res.data.data.reply;
       const mood = res.data.data.mood || 'happy';
+      const imageUrl = res.data.data.imageUrl;
       
       setCurrentMood(mood);
-      setMessages(prev => [...prev, { role: 'model', text: reply, mood }]);
+      setMessages(prev => [...prev, { role: 'model', text: reply, mood, imageUrl }]);
     } catch (err) {
       console.error(err);
       addToast(err.response?.data?.message || 'Failed to connect to AI Coach', 'error');
@@ -102,8 +103,9 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
 
         const reply = res.data.data.reply;
         const mood = res.data.data.mood || 'happy';
+        const imageUrl = res.data.data.imageUrl;
         setCurrentMood(mood);
-        setMessages(prev => [...prev, { role: 'model', text: reply, mood }]);
+        setMessages(prev => [...prev, { role: 'model', text: reply, mood, imageUrl }]);
       } catch (err) {
         console.error(err);
       } finally {
@@ -191,6 +193,11 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
                 </div>
                 <div className={`chat-message ${msg.role}`}>
                   {msg.text}
+                  {msg.imageUrl && (
+                    <div style={{ marginTop: '8px' }}>
+                      <img src={msg.imageUrl} alt="Kitty's Selfie" style={{ maxWidth: '100%', borderRadius: '8px' }} />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
