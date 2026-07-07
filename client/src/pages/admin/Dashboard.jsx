@@ -28,6 +28,16 @@ export default function Dashboard() {
     }
   };
 
+  const toggleStatus = async (clientId) => {
+    try {
+      await adminAPI.toggleClientStatus(clientId);
+      addToast('Client status updated successfully', 'success');
+      fetchRecentClients();
+    } catch (err) {
+      addToast('Failed to update status', 'error');
+    }
+  };
+
   const quickActions = [
     {
       title: 'Add Workout',
@@ -168,9 +178,17 @@ export default function Dashboard() {
                       </td>
                       <td className="text-muted">{client.phone}</td>
                       <td>
-                        <Badge variant={client.subscription?.status === 'active' ? 'success' : 'warning'}>
-                          {client.subscription?.status || 'inactive'}
-                        </Badge>
+                        <button
+                          onClick={() => toggleStatus(client._id || client.id)}
+                          title={`Click to ${client.isActive !== false ? 'deactivate' : 'activate'} user`}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          <Badge variant={client.isActive !== false ? 'success' : 'warning'} style={{ cursor: 'pointer' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              {client.isActive !== false ? 'active' : 'inactive'}
+                            </span>
+                          </Badge>
+                        </button>
                       </td>
                       <td>
                         <div className="flex gap-sm text-muted" style={{ fontSize: '0.8rem', marginTop: 4 }}>
