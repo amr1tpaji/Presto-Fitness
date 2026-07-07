@@ -15,16 +15,13 @@ import KeyVerify from './pages/auth/KeyVerify';
 import AdminDashboard from './pages/admin/Dashboard';
 import ClientList from './pages/admin/ClientList';
 import ClientDetail from './pages/admin/ClientDetail';
-import Workouts from './pages/admin/Workouts';
-import DietPlans from './pages/admin/DietPlans';
 import LabReports from './pages/admin/LabReports';
 import Payments from './pages/admin/Payments';
 import AdminSettings from './pages/admin/Settings';
 
 // Client pages
 import ClientHome from './pages/client/Home';
-import MyWorkout from './pages/client/MyWorkout';
-import MyDiet from './pages/client/MyDiet';
+import MyPlan from './pages/client/MyPlan';
 import LogMeal from './pages/client/LogMeal';
 import MyProgress from './pages/client/MyProgress';
 import MyRewards from './pages/client/MyRewards';
@@ -110,8 +107,6 @@ export default function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/clients" element={<ClientList />} />
               <Route path="/admin/clients/:id" element={<ClientDetail />} />
-              <Route path="/admin/workouts" element={<Workouts />} />
-              <Route path="/admin/diet-plans" element={<DietPlans />} />
               <Route path="/admin/lab-reports" element={<LabReports />} />
               <Route path="/admin/payments" element={<Payments />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
@@ -125,8 +120,7 @@ export default function App() {
           <Route element={<ClientLayout />}>
             <Route path="/home" element={<ClientHome />} />
             <Route path="/meals/log" element={<LogMeal />} />
-            <Route path="/workout" element={<MyWorkout />} />
-            <Route path="/diet" element={<MyDiet />} />
+            <Route path="/plan" element={<MyPlan />} />
             <Route path="/progress" element={<MyProgress />} />
             <Route path="/rewards" element={<MyRewards />} />
             <Route path="/profile" element={<Profile />} />

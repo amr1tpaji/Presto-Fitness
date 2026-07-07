@@ -94,6 +94,9 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    planPdf: {
+      type: String,
+    },
   },
   {
     timestamps: true,

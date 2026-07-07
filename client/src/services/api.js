@@ -95,6 +95,7 @@ export const adminAPI = {
   getDashboardStats: () => API.get('/admin/dashboard/stats'),
   toggleClientStatus: (id) => API.put(`/admin/clients/${id}/status`),
   toggleTaskStatus: (taskId) => API.put(`/admin/tasks/${taskId}/toggle`),
+  uploadPlanPdf: (id, formData) => API.post(`/admin/clients/${id}/plan-pdf`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // ===== Workouts API =====

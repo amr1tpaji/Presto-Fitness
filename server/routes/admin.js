@@ -5,6 +5,7 @@ const Workout = require('../models/Workout');
 const DietPlan = require('../models/DietPlan');
 const Payment = require('../models/Payment');
 const { protect, adminOnly } = require('../middleware/auth');
+const { uploadSingle } = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -150,6 +151,36 @@ router.get('/dashboard/stats', async (req, res, next) => {
         totalRevenue,
         recentPayments,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── POST /api/admin/clients/:id/plan-pdf ───────────────────────────────────
+// Upload a generic PDF plan (workout/diet combined)
+router.post('/clients/:id/plan-pdf', uploadSingle, async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No PDF file provided' });
+    }
+
+    const client = await User.findById(req.params.id);
+    if (!client) {
+      return res.status(404).json({ success: false, message: 'Client not found' });
+    }
+
+    const fileUrl = req.file.path.startsWith('http')
+      ? req.file.path
+      : `/uploads/${req.file.filename}`;
+
+    client.planPdf = fileUrl;
+    await client.save();
+
+    res.json({
+      success: true,
+      message: 'Plan PDF uploaded successfully',
+      data: { planPdf: fileUrl },
     });
   } catch (error) {
     next(error);

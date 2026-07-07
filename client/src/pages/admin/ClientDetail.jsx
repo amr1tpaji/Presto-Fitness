@@ -1,9 +1,7 @@
-import { useState, useEffect, useContext, useCallback } from 'react';
+import { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { adminAPI, paymentsAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
-import WorkoutBuilder from '../../components/admin/WorkoutBuilder';
-import DietPlanBuilder from '../../components/admin/DietPlanBuilder';
 import LabReportUploader from '../../components/admin/LabReportUploader';
 import TaskManager from '../../components/admin/TaskManager';
 import WeightChart from '../../components/admin/WeightChart';
@@ -14,14 +12,13 @@ import ChatUI from '../../components/common/ChatUI';
 import {
   ArrowLeft, User, Phone, Crown, Flame, Star,
   Activity, Dumbbell, UtensilsCrossed, FlaskConical,
-  ListChecks, CreditCard, CheckCircle2, XCircle, Trash2, MessageCircle
+  ListChecks, CreditCard, CheckCircle2, XCircle, Trash2, MessageCircle, FileText, Upload
 } from 'lucide-react';
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: <Activity size={16} /> },
   { key: 'chat', label: 'Chat', icon: <MessageCircle size={16} /> },
-  { key: 'workout', label: 'Workout', icon: <Dumbbell size={16} /> },
-  { key: 'diet', label: 'Diet', icon: <UtensilsCrossed size={16} /> },
+  { key: 'plan', label: 'Plan', icon: <FileText size={16} /> },
   { key: 'meals', label: 'Meals', icon: <UtensilsCrossed size={16} /> },
   { key: 'labs', label: 'Labs', icon: <FlaskConical size={16} /> },
   { key: 'tasks', label: 'Tasks', icon: <ListChecks size={16} /> },
@@ -39,7 +36,31 @@ export default function ClientDetail() {
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentPlan, setPaymentPlan] = useState('');
+  const [uploadingPlan, setUploadingPlan] = useState(false);
+  const planFileRef = useRef(null);
   const navigate = useNavigate();
+
+  const handlePlanUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      addToast('Please upload a PDF file', 'error');
+      return;
+    }
+
+    setUploadingPlan(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await adminAPI.uploadPlanPdf(id, formData);
+      addToast('Plan uploaded successfully', 'success');
+      fetchClient();
+    } catch (err) {
+      addToast('Failed to upload plan', 'error');
+    } finally {
+      setUploadingPlan(false);
+    }
+  };
 
   const fetchClient = useCallback(async () => {
     try {
@@ -330,26 +351,63 @@ export default function ClientDetail() {
         </div>
       )}
 
-      {activeTab === 'workout' && (
-        <WorkoutBuilder
-          workout={client.workout || null}
-          clientId={id}
-          onSave={() => {
-            fetchClient();
-            addToast('Workout saved successfully', 'success');
-          }}
-        />
-      )}
+      {activeTab === 'plan' && (
+        <div className="flex-col gap-lg">
+          <div className="card">
+            <div className="card-header">
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>Upload Plan (PDF)</h3>
+              <p className="text-muted" style={{ fontSize: '0.85rem', margin: '0.25rem 0 0' }}>Upload a comprehensive workout and diet plan as a PDF file.</p>
+            </div>
+            <div className="card-body">
+              <div 
+                className="upload-zone hoverable"
+                onClick={() => planFileRef.current?.click()}
+                style={{
+                  border: '2px dashed var(--border)',
+                  padding: '2rem',
+                  textAlign: 'center',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  background: 'var(--bg-tertiary)'
+                }}
+              >
+                <Upload size={32} style={{ color: 'var(--text-muted)', margin: '0 auto 1rem', display: 'block' }} />
+                <p style={{ margin: 0, fontWeight: 500 }}>{uploadingPlan ? 'Uploading...' : 'Click to upload a PDF'}</p>
+                <input 
+                  type="file" 
+                  ref={planFileRef} 
+                  accept="application/pdf"
+                  style={{ display: 'none' }}
+                  onChange={handlePlanUpload}
+                />
+              </div>
+            </div>
+          </div>
 
-      {activeTab === 'diet' && (
-        <DietPlanBuilder
-          dietPlan={client.dietPlan || null}
-          clientId={id}
-          onSave={() => {
-            fetchClient();
-            addToast('Diet plan saved successfully', 'success');
-          }}
-        />
+          {client.planPdf && (
+            <div className="card">
+              <div className="card-header flex flex-between" style={{ alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem' }}>Current Plan Preview</h3>
+                <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-ghost">
+                  Open in new tab
+                </a>
+              </div>
+              <div className="card-body" style={{ padding: 0, height: '800px', overflow: 'hidden' }}>
+                <object 
+                  data={getImageUrl(client.planPdf)} 
+                  type="application/pdf" 
+                  width="100%" 
+                  height="100%"
+                >
+                  <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    <p>PDF preview not available in this browser.</p>
+                    <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">Download PDF</a>
+                  </div>
+                </object>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {activeTab === 'meals' && <MealLogViewer clientId={id} />}

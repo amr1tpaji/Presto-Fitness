@@ -3,14 +3,12 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
   LayoutDashboard, Users, Dumbbell, UtensilsCrossed,
-  FlaskConical, CreditCard, Settings, Home, TrendingUp, Trophy, User as UserIcon, X, Menu, MessageCircle
+  FlaskConical, CreditCard, Settings, Home, TrendingUp, Trophy, User as UserIcon, X, Menu, MessageCircle, FileText
 } from 'lucide-react';
 
 const adminItems = [
   { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/clients', icon: Users, label: 'Clients' },
-  { to: '/admin/workouts', icon: Dumbbell, label: 'Workouts' },
-  { to: '/admin/diet-plans', icon: UtensilsCrossed, label: 'Diet Plans' },
   { to: '/admin/lab-reports', icon: FlaskConical, label: 'Lab Reports' },
   { to: '/admin/payments', icon: CreditCard, label: 'Payments' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
@@ -19,8 +17,7 @@ const adminItems = [
 const clientItems = [
   { to: '/home', icon: Home, label: 'Home' },
   { to: '/messages', icon: MessageCircle, label: 'Messages' },
-  { to: '/workout', icon: Dumbbell, label: 'My Workout' },
-  { to: '/diet', icon: UtensilsCrossed, label: 'My Diet' },
+  { to: '/plan', icon: FileText, label: 'My Plan' },
   { to: '/progress', icon: TrendingUp, label: 'Progress' },
   { to: '/rewards', icon: Trophy, label: 'Rewards' },
   { to: '/profile', icon: UserIcon, label: 'Profile' },
