@@ -125,7 +125,12 @@ export default function MyPlan() {
               <FileText size={40} color="var(--accent)" />
             </div>
             <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>No plan assigned yet</h3>
-            <p className="text-muted" style={{ maxWidth: '400px', margin: '0 auto' }}>Your trainer hasn't uploaded your intelligent plan yet. Please check back later!</p>
+            <p className="text-muted" style={{ maxWidth: '400px', margin: '0 auto', marginBottom: user?.planPdf ? '24px' : '0' }}>Your trainer hasn't uploaded your intelligent plan yet. Please check back later!</p>
+            {user?.planPdf && (
+              <a href={getImageUrl(user.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, margin: '0 auto' }}>
+                <FileText size={16} /> View Original Document
+              </a>
+            )}
           </div>
         )}
       </div>

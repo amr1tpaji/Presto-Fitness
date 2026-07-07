@@ -463,6 +463,20 @@ export default function ClientDetail() {
                    </div>
                 </div>
               )}
+              {!client.dietPlan && (
+                <div className="card-body">
+                   <div className="empty-state" style={{ padding: '40px 20px', textAlign: 'center' }}>
+                     <FileText size={48} color="var(--text-muted)" style={{ margin: '0 auto 16px' }} />
+                     <h4 style={{ margin: '0 0 8px 0' }}>Plan Breakdown Unavailable</h4>
+                     <p style={{ color: 'var(--text-muted)', margin: '0 auto 16px', maxWidth: '400px', fontSize: '0.9rem' }}>
+                       The AI could not extract the structured diet breakdown from this PDF. This usually happens if the PDF contains images instead of text, or if the AI key is missing.
+                     </p>
+                     <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+                        <FileText size={16} /> View Original PDF
+                     </a>
+                   </div>
+                </div>
+              )}
             </div>
           )}
         </div>
