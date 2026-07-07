@@ -218,4 +218,36 @@ router.get('/admin/all', adminOnly, async (req, res, next) => {
   }
 });
 
+// ── POST /api/payments/admin/manual ─────────────────────────────────────────
+// Admin: Add a manual payment record
+router.post('/admin/manual', adminOnly, async (req, res, next) => {
+  try {
+    const { userId, amount, plan, description } = req.body;
+
+    if (!userId || !amount) {
+      return res.status(400).json({
+        success: false,
+        message: 'Client ID and amount are required',
+      });
+    }
+
+    const payment = await Payment.create({
+      userId,
+      amount: Number(amount),
+      plan: plan || 'manual',
+      description: description || 'Manual payment entry',
+      status: 'paid',
+      paidAt: new Date(),
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Manual payment added successfully',
+      data: { payment },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

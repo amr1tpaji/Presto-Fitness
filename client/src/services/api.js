@@ -168,6 +168,7 @@ export const paymentsAPI = {
   verify: (data) => API.post('/payments/verify', data),
   getHistory: () => API.get('/payments/history'),
   getAllAdmin: (params) => API.get('/payments/admin/all', { params }),
+  addManualPayment: (data) => API.post('/payments/admin/manual', data),
 };
 
 // ===== Chat API =====

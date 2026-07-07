@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { adminAPI, getImageUrl } from '../../services/api';
+import { adminAPI, paymentsAPI, getImageUrl } from '../../services/api';
 import { ToastContext } from '../../context/ToastContext';
 import WorkoutBuilder from '../../components/admin/WorkoutBuilder';
 import DietPlanBuilder from '../../components/admin/DietPlanBuilder';
@@ -36,6 +36,9 @@ export default function ClientDetail() {
   const [activeTab, setActiveTab] = useState('overview');
   const [labReports, setLabReports] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentPlan, setPaymentPlan] = useState('');
   const navigate = useNavigate();
 
   const fetchClient = useCallback(async () => {
@@ -436,9 +439,66 @@ export default function ClientDetail() {
 
       {activeTab === 'payments' && (
         <div className="card">
-          <div className="card-header">
+          <div className="card-header flex flex-between" style={{ alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '1rem' }}>Payment History</h3>
+            <button 
+              className="btn btn-sm btn-primary"
+              onClick={() => setShowPaymentForm(!showPaymentForm)}
+            >
+              {showPaymentForm ? 'Cancel' : 'Add Manual Payment'}
+            </button>
           </div>
+          
+          {showPaymentForm && (
+            <div className="card-body" style={{ borderBottom: '1px solid var(--border)' }}>
+              <form 
+                className="flex gap-md" 
+                style={{ alignItems: 'flex-end', flexWrap: 'wrap' }}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!paymentAmount) return;
+                  try {
+                    await paymentsAPI.addManualPayment({
+                      userId: id,
+                      amount: Number(paymentAmount),
+                      plan: paymentPlan
+                    });
+                    addToast('Payment added successfully', 'success');
+                    setPaymentAmount('');
+                    setPaymentPlan('');
+                    setShowPaymentForm(false);
+                    fetchClient(); // this will refresh payments
+                  } catch (err) {
+                    addToast(err.response?.data?.message || 'Failed to add payment', 'error');
+                  }
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 150 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Amount (₹)</label>
+                  <input 
+                    type="number" 
+                    className="input" 
+                    required 
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    placeholder="e.g. 5000"
+                  />
+                </div>
+                <div style={{ flex: 1, minWidth: 150 }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Plan (optional)</label>
+                  <input 
+                    type="text" 
+                    className="input" 
+                    value={paymentPlan}
+                    onChange={(e) => setPaymentPlan(e.target.value)}
+                    placeholder="e.g. monthly"
+                  />
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ marginBottom: 2 }}>Save Payment</button>
+              </form>
+            </div>
+          )}
+
           <div className="card-body">
             {payments.length === 0 ? (
               <div className="empty-state">
