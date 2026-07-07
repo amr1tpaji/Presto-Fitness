@@ -6,7 +6,7 @@ import { ToastContext } from '../../context/ToastContext';
 import Loader from '../../components/common/Loader';
 import {
   Sun, Moon, Sunrise, CheckCircle2, Circle, Scale,
-  Target, Star, UtensilsCrossed, Dumbbell, Apple, Sparkles,
+  Target, Star, UtensilsCrossed, Dumbbell, Apple, Sparkles, FileText
 } from 'lucide-react';
 import '../../styles/client.css';
 
@@ -232,7 +232,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid grid-3 gap-md">
+      <div className="grid grid-2 gap-md">
         <button
           className="card"
           onClick={() => navigate('/meals/log')}
@@ -250,7 +250,7 @@ export default function Home() {
         </button>
         <button
           className="card"
-          onClick={() => navigate('/workout')}
+          onClick={() => navigate('/plan')}
           style={{
             cursor: 'pointer',
             border: 'none',
@@ -260,23 +260,8 @@ export default function Home() {
             background: 'var(--bg-secondary, #111)',
           }}
         >
-          <Dumbbell size={28} style={{ color: 'var(--accent)', marginBottom: 8 }} />
-          <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>View Workout</p>
-        </button>
-        <button
-          className="card"
-          onClick={() => navigate('/diet')}
-          style={{
-            cursor: 'pointer',
-            border: 'none',
-            textAlign: 'center',
-            padding: '1.5rem',
-            transition: 'transform 0.2s',
-            background: 'var(--bg-secondary, #111)',
-          }}
-        >
-          <Apple size={28} style={{ color: 'var(--warning, #f59e0b)', marginBottom: 8 }} />
-          <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>View Diet</p>
+          <FileText size={28} style={{ color: 'var(--accent)', marginBottom: 8 }} />
+          <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>My Plan</p>
         </button>
       </div>
     </div>

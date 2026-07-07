@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Trophy,
   User as UserIcon,
+  FileText
 } from 'lucide-react';
 
 const adminItems = [
@@ -26,8 +27,7 @@ const adminItems = [
 
 const clientItems = [
   { to: '/home', icon: Home, label: 'Home' },
-  { to: '/workout', icon: Dumbbell, label: 'My Workout' },
-  { to: '/diet', icon: UtensilsCrossed, label: 'My Diet' },
+  { to: '/plan', icon: FileText, label: 'My Plan' },
   { to: '/progress', icon: TrendingUp, label: 'Progress' },
   { to: '/rewards', icon: Trophy, label: 'Rewards' },
   { to: '/profile', icon: UserIcon, label: 'Profile' },
