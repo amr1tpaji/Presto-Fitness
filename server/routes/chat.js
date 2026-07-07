@@ -127,6 +127,7 @@ router.post('/', async (req, res, next) => {
       } else {
         options.response_format = { type: 'json_object' };
       }
+      options.response_format = { type: 'json_object' };
 
       const chatCompletion = await groq.chat.completions.create(options);
       const responseMessage = chatCompletion.choices[0]?.message;
