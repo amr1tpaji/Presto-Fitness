@@ -5,6 +5,7 @@ const { protect, adminOnly } = require('../middleware/auth');
 const { uploadSingle } = require('../middleware/upload');
 const Groq = require('groq-sdk');
 const fs = require('fs');
+const { updateStreak } = require('../services/rewardEngine');
 
 const router = express.Router();
 
@@ -106,6 +107,9 @@ Do not include any markdown formatting.`;
         isOnPlan: req.body.isOnPlan === 'true' || req.body.isOnPlan === true,
         date: req.body.date || Date.now(),
       });
+
+      // Update streak if both meal and weight criteria are met for the day
+      await updateStreak(req.user._id);
 
       res.status(201).json({
         success: true,

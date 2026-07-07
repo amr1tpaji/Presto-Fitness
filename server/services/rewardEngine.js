@@ -3,6 +3,7 @@ const Reward = require('../models/Reward');
 const DailyTask = require('../models/DailyTask');
 const MealLog = require('../models/MealLog');
 const Workout = require('../models/Workout');
+const WeightLog = require('../models/WeightLog');
 
 /**
  * Badge definitions.
@@ -181,14 +182,6 @@ const checkAndAwardRewards = async (userId) => {
   return newRewards;
 };
 
-/**
- * Update the user's streak based on consecutive daily task completion.
- * A streak continues if the user completed all tasks yesterday.
- * If they missed a day, the streak resets to 1 (for today's completion).
- *
- * @param {string} userId
- * @returns {Promise<{ streak: number, longestStreak: number }>}
- */
 const updateStreak = async (userId) => {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
@@ -196,31 +189,52 @@ const updateStreak = async (userId) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  // Check if yesterday's tasks were all completed
-  const yesterdayTasks = await DailyTask.findOne({
+  // Check if they completed today's requirements
+  const mealsToday = await MealLog.countDocuments({
     userId,
-    date: {
-      $gte: yesterday,
-      $lt: today,
-    },
-    allCompleted: true,
+    date: { $gte: today, $lt: tomorrow },
+  });
+  const weightToday = await WeightLog.countDocuments({
+    userId,
+    date: { $gte: today, $lt: tomorrow },
   });
 
-  let newStreak;
-  const lastActivity = user.rewards?.lastActivityDate;
+  const completedToday = mealsToday > 0 && weightToday > 0;
 
-  if (yesterdayTasks) {
+  if (!completedToday) {
+    // Not completed yet, don't update streak
+    return { streak: user.rewards?.streak || 0, longestStreak: user.rewards?.longestStreak || 0 };
+  }
+
+  const lastActivity = user.rewards?.lastActivityDate;
+  if (lastActivity && new Date(lastActivity).toDateString() === today.toDateString()) {
+    // Already updated today — keep current streak
+    return { streak: user.rewards?.streak || 1, longestStreak: user.rewards?.longestStreak || 1 };
+  }
+
+  // They completed it today, let's see if they completed it yesterday
+  const mealsYesterday = await MealLog.countDocuments({
+    userId,
+    date: { $gte: yesterday, $lt: today },
+  });
+  const weightYesterday = await WeightLog.countDocuments({
+    userId,
+    date: { $gte: yesterday, $lt: today },
+  });
+
+  const completedYesterday = mealsYesterday > 0 && weightYesterday > 0;
+
+  let newStreak;
+
+  if (completedYesterday) {
     // Consecutive day — increment streak
     newStreak = (user.rewards?.streak || 0) + 1;
-  } else if (
-    lastActivity &&
-    new Date(lastActivity).toDateString() === today.toDateString()
-  ) {
-    // Already updated today — keep current streak
-    newStreak = user.rewards?.streak || 1;
   } else {
     // Streak broken — reset to 1
     newStreak = 1;

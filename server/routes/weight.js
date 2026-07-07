@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const WeightLog = require('../models/WeightLog');
 const User = require('../models/User');
 const { protect, adminOnly } = require('../middleware/auth');
+const { updateStreak } = require('../services/rewardEngine');
 
 const router = express.Router();
 
@@ -52,6 +53,9 @@ router.post(
       await User.findByIdAndUpdate(userId, {
         currentWeight: req.body.weight,
       });
+
+      // Update streak if both meal and weight criteria are met for the day
+      await updateStreak(userId);
 
       res.status(201).json({
         success: true,
