@@ -73,7 +73,7 @@ app.use(cookieParser());
 // Global rate limiter — 200 requests per 15 min per IP
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: process.env.NODE_ENV === 'development' ? 5000 : 2000, // Increased limits to prevent blocking during dev/testing
   message: {
     success: false,
     message: 'Too many requests from this IP. Please try again later.',
