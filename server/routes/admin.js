@@ -93,7 +93,11 @@ router.get('/clients/:id', async (req, res, next) => {
       }).sort({ createdAt: -1 }),
       DailyTask.findOne({
         userId: client._id,
-      }).sort({ date: -1 }),
+        date: {
+          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+          $lt: new Date(new Date().setHours(23, 59, 59, 999))
+        }
+      }),
     ]);
 
     res.json({
@@ -173,6 +177,41 @@ router.put('/clients/:id/status', async (req, res, next) => {
       message: `Client has been ${client.isActive ? 'activated' : 'deactivated'}.`,
       data: { isActive: client.isActive },
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── PUT /api/admin/tasks/:taskId/toggle ─────────────────────────────────────
+// Toggle task completion status
+router.put('/tasks/:taskId/toggle', async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+    const DailyTask = require('../models/DailyTask');
+    
+    const dailyTask = await DailyTask.findOne({ 'tasks._id': taskId });
+    if (!dailyTask) {
+      return res.status(404).json({ success: false, message: 'Task not found' });
+    }
+
+    const task = dailyTask.tasks.id(taskId);
+    task.isCompleted = !task.isCompleted;
+    task.completedAt = task.isCompleted ? new Date() : null;
+
+    // Recalculate points
+    dailyTask.totalPoints = dailyTask.tasks
+      .filter((t) => t.isCompleted)
+      .reduce((sum, t) => sum + (t.points || 10), 0);
+
+    const allDone = dailyTask.tasks.every((t) => t.isCompleted);
+    dailyTask.allCompleted = allDone;
+    if (allDone) {
+      dailyTask.totalPoints += 50; // all-tasks bonus
+    }
+
+    await dailyTask.save();
+
+    res.json({ success: true, message: 'Task toggled successfully' });
   } catch (error) {
     next(error);
   }

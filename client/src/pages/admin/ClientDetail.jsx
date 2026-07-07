@@ -75,6 +75,15 @@ export default function ClientDetail() {
     }
   };
 
+  const handleToggleTask = async (taskId) => {
+    try {
+      await adminAPI.toggleTaskStatus(taskId);
+      fetchClient();
+    } catch (err) {
+      addToast('Failed to toggle task', 'error');
+    }
+  };
+
   const handleLabUpload = () => {
     fetchClient();
     addToast('Lab report uploaded successfully', 'success');
@@ -286,15 +295,16 @@ export default function ClientDetail() {
                       {recentTasks.slice(0, 5).map((task, idx) => (
                         <div
                           key={task._id || idx}
-                          className="flex gap-sm"
-                          style={{ alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border, #333)' }}
+                          onClick={() => handleToggleTask(task._id)}
+                          className="flex gap-sm hoverable"
+                          style={{ alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border, #333)', cursor: 'pointer' }}
                         >
-                          {task.completed ? (
+                          {task.isCompleted ? (
                             <CheckCircle2 size={18} style={{ color: 'var(--success, #22c55e)', flexShrink: 0 }} />
                           ) : (
                             <XCircle size={18} style={{ color: 'var(--text-muted, #888)', flexShrink: 0 }} />
                           )}
-                          <span style={{ flex: 1, textDecoration: task.completed ? 'line-through' : 'none', opacity: task.completed ? 0.6 : 1 }}>
+                          <span style={{ flex: 1, textDecoration: task.isCompleted ? 'line-through' : 'none', opacity: task.isCompleted ? 0.6 : 1 }}>
                             {task.title}
                           </span>
                           <span className="text-accent" style={{ fontSize: '0.8rem', fontWeight: 600 }}>
