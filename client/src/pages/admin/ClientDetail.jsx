@@ -390,9 +390,28 @@ export default function ClientDetail() {
             <div className="card">
               <div className="card-header flex flex-between" style={{ alignItems: 'center' }}>
                 <h3 style={{ margin: 0, fontSize: '1rem' }}>Current Plan Preview</h3>
-                <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-ghost">
-                  Open in new tab
-                </a>
+                <div className="flex gap-sm">
+                  <a href={getImageUrl(client.planPdf)} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-ghost">
+                    Open in new tab
+                  </a>
+                  <button 
+                    className="btn btn-sm" 
+                    style={{ background: 'var(--danger-subtle)', color: 'var(--danger)', border: 'none' }}
+                    onClick={async () => {
+                      if (window.confirm("Are you sure you want to delete this plan? This will also deactivate the AI-generated diet plan for the client.")) {
+                        try {
+                          await adminAPI.deletePlanPdf(id);
+                          addToast('Plan deleted successfully', 'success');
+                          fetchClient();
+                        } catch (err) {
+                          addToast('Failed to delete plan', 'error');
+                        }
+                      }
+                    }}
+                  >
+                    Delete Plan
+                  </button>
+                </div>
               </div>
               <div className="card-body" style={{ padding: 0, height: '800px', overflow: 'hidden' }}>
                 <object 

@@ -183,23 +183,24 @@ router.post('/clients/:id/plan-pdf', uploadSingle, async (req, res, next) => {
     client.planPdf = fileUrl;
     await client.save();
     
-    // Read PDF and extract text
-    let pdfBuffer;
-    if (req.file.path.startsWith('http')) {
-      const response = await fetch(req.file.path);
-      const arrayBuffer = await response.arrayBuffer();
-      pdfBuffer = Buffer.from(arrayBuffer);
-    } else {
-      pdfBuffer = fs.readFileSync(req.file.path);
-    }
-    
-    const pdfData = await pdfParse(pdfBuffer);
-    const pdfText = pdfData.text;
+    // Read PDF and extract text (Wrapped in try/catch so upload succeeds even if AI fails)
+    try {
+      let pdfBuffer;
+      if (req.file.path.startsWith('http')) {
+        const response = await fetch(req.file.path);
+        const arrayBuffer = await response.arrayBuffer();
+        pdfBuffer = Buffer.from(arrayBuffer);
+      } else {
+        pdfBuffer = fs.readFileSync(req.file.path);
+      }
+      
+      const pdfData = await pdfParse(pdfBuffer);
+      const pdfText = pdfData.text;
 
-    // Use Groq to parse Diet Plan from text
-    if (process.env.GROQ_API_KEY && pdfText && pdfText.trim().length > 0) {
-      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-      const prompt = `You are a fitness data extraction assistant.
+      // Use Groq to parse Diet Plan from text
+      if (process.env.GROQ_API_KEY && pdfText && pdfText.trim().length > 0) {
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+        const prompt = `You are a fitness data extraction assistant.
 Extract the diet plan from the following PDF text.
 Output ONLY a valid JSON object matching this exact schema:
 {
@@ -230,44 +231,71 @@ If a value is not provided in the text, estimate reasonably or use 0. Do not wra
 PDF TEXT:
 ${pdfText}`;
 
-      const chatCompletion = await groq.chat.completions.create({
-        messages: [{ role: 'user', content: prompt }],
-        model: 'llama-3.3-70b-versatile',
-        response_format: { type: 'json_object' }
-      });
+        const chatCompletion = await groq.chat.completions.create({
+          messages: [{ role: 'user', content: prompt }],
+          model: 'llama-3.3-70b-versatile',
+          response_format: { type: 'json_object' }
+        });
 
-      let aiResponse = chatCompletion.choices[0]?.message?.content || '{}';
-      
-      // Clean markdown if present
-      let text = aiResponse.trim();
-      const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-      if (jsonMatch) {
-        text = jsonMatch[1].trim();
-      }
-
-      try {
-        const dietData = JSON.parse(text);
-        if (dietData.meals && dietData.meals.length > 0) {
-          // Deactivate current active diet plan
-          await DietPlan.updateMany({ assignedTo: client._id, isActive: true }, { isActive: false });
-          
-          const newDietPlan = new DietPlan({
-            ...dietData,
-            assignedTo: [client._id],
-            createdBy: req.user._id,
-            isActive: true,
-          });
-          await newDietPlan.save();
+        let aiResponse = chatCompletion.choices[0]?.message?.content || '{}';
+        
+        // Clean markdown if present
+        let text = aiResponse.trim();
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+        if (jsonMatch) {
+          text = jsonMatch[1].trim();
         }
-      } catch (err) {
-        console.error("Failed to parse AI response for diet plan", text);
+
+        try {
+          const dietData = JSON.parse(text);
+          if (dietData.meals && dietData.meals.length > 0) {
+            // Deactivate current active diet plan
+            await DietPlan.updateMany({ assignedTo: client._id, isActive: true }, { isActive: false });
+            
+            const newDietPlan = new DietPlan({
+              ...dietData,
+              assignedTo: [client._id],
+              createdBy: req.user._id,
+              isActive: true,
+            });
+            await newDietPlan.save();
+          }
+        } catch (err) {
+          console.error("Failed to parse AI response for diet plan", text);
+        }
       }
+    } catch (parseError) {
+      console.error("Failed to parse PDF or extract diet plan:", parseError);
     }
 
     res.json({
       success: true,
-      message: 'Plan PDF uploaded and parsed successfully',
+      message: 'Plan PDF uploaded and processed successfully',
       data: { planPdf: fileUrl },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── DELETE /api/admin/clients/:id/plan-pdf ─────────────────────────────────
+// Remove a client's plan PDF
+router.delete('/clients/:id/plan-pdf', async (req, res, next) => {
+  try {
+    const client = await User.findById(req.params.id);
+    if (!client) {
+      return res.status(404).json({ success: false, message: 'Client not found' });
+    }
+
+    client.planPdf = null;
+    await client.save();
+
+    // Also deactivate the AI generated diet plan
+    await DietPlan.updateMany({ assignedTo: client._id, isActive: true }, { isActive: false });
+
+    res.json({
+      success: true,
+      message: 'Plan deleted successfully',
     });
   } catch (error) {
     next(error);
