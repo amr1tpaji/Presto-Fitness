@@ -231,6 +231,13 @@ router.post(
         });
       }
 
+      if (user.role === 'client' && user.isActive === false) {
+        return res.status(403).json({
+          success: false,
+          message: 'Your account is inactive. Please contact the admin.',
+        });
+      }
+
       const isMatch = await user.comparePassword(password);
       if (!isMatch) {
         return res.status(401).json({

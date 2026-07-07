@@ -37,6 +37,14 @@ const protect = async (req, res, next) => {
     }
 
     req.user = user;
+    
+    if (user.role === 'client' && user.isActive === false) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account is inactive. Please contact the admin.',
+      });
+    }
+
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

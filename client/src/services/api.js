@@ -93,6 +93,7 @@ export const adminAPI = {
   getClient: (id) => API.get(`/admin/clients/${id}`),
   deleteClient: (id) => API.delete(`/admin/clients/${id}`),
   getDashboardStats: () => API.get('/admin/dashboard/stats'),
+  toggleClientStatus: (id) => API.put(`/admin/clients/${id}/status`),
 };
 
 // ===== Workouts API =====

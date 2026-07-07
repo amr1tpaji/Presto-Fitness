@@ -30,7 +30,7 @@ router.get('/clients', async (req, res, next) => {
 
     const [clientsRaw, total] = await Promise.all([
       User.find(filter)
-        .select('name phone email avatar gender currentWeight subscription rewards.streak rewards.points isPhoneVerified activationKey createdAt')
+        .select('name phone email avatar gender currentWeight subscription rewards.streak rewards.points isPhoneVerified activationKey createdAt isActive')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(parseInt(limit)),
@@ -146,6 +146,32 @@ router.get('/dashboard/stats', async (req, res, next) => {
         totalRevenue,
         recentPayments,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ── PUT /api/admin/clients/:id/status ───────────────────────────────────────
+// Toggle client's active status
+router.put('/clients/:id/status', async (req, res, next) => {
+  try {
+    const client = await User.findById(req.params.id);
+    if (!client || client.role !== 'client') {
+      return res.status(404).json({
+        success: false,
+        message: 'Client not found',
+      });
+    }
+
+    const currentStatus = client.isActive !== false;
+    client.isActive = req.body.isActive !== undefined ? req.body.isActive : !currentStatus;
+    await client.save();
+
+    res.json({
+      success: true,
+      message: `Client has been ${client.isActive ? 'activated' : 'deactivated'}.`,
+      data: { isActive: client.isActive },
     });
   } catch (error) {
     next(error);
