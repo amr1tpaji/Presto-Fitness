@@ -8,6 +8,7 @@ router.use(protect);
 const User = require('../models/User');
 const Message = require('../models/Message');
 const DailyTask = require('../models/DailyTask');
+const KittyConversation = require('../models/KittyConversation');
 
 const CLIENT_SYSTEM_PROMPT = `You are Kitty, a very friendly, cute, and girly virtual companion (inspired by Hello Kitty) living in the Presto Fitness app.
 Your role is to assist the user, guide them through the app's features (like logging meals, tracking workouts, checking diets), and act as a sweet companion.
@@ -104,9 +105,21 @@ const clientTools = [
   }
 ];
 
+router.get('/history', async (req, res, next) => {
+  try {
+    const convo = await KittyConversation.findOne({ userId: req.user._id });
+    if (!convo) {
+      return res.json({ success: true, data: [] });
+    }
+    res.json({ success: true, data: convo.messages });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/', async (req, res, next) => {
   try {
-    const { message, history } = req.body;
+    const { message } = req.body;
 
     if (!message) {
       return res.status(400).json({ success: false, message: 'Message is required' });
@@ -134,16 +147,25 @@ router.post('/', async (req, res, next) => {
     
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-    // Format history for Groq API (OpenAI format)
-    const formattedHistory = (history || []).map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'assistant', // Groq uses 'assistant' instead of 'model'
+    // Load history from DB
+    let convo = await KittyConversation.findOne({ userId: req.user._id });
+    if (!convo) {
+      convo = new KittyConversation({ userId: req.user._id, messages: [] });
+    }
+    
+    // Push user message to DB
+    convo.messages.push({ role: 'user', text: message });
+
+    const formattedHistory = convo.messages.map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'assistant',
       content: msg.text
     }));
 
+    // For the context sent to Groq, we don't need to append the user message again
+    // since it's already pushed into formattedHistory above.
     const messagesArray = [
       { role: 'system', content: basePrompt + dynamicContext },
-      ...formattedHistory,
-      { role: 'user', content: message }
+      ...formattedHistory
     ];
 
     let isToolCalling = true;
@@ -239,9 +261,22 @@ router.post('/', async (req, res, next) => {
       console.error("Failed to parse Kitty JSON", text);
     }
 
+    // Push AI reply to DB
+    convo.messages.push({
+      role: 'model',
+      text: parsed.reply,
+      mood: parsed.mood,
+      imageUrl: parsed.imageUrl
+    });
+    // Keep history reasonably sized (e.g. last 100 messages) to avoid token limits
+    if (convo.messages.length > 100) {
+      convo.messages = convo.messages.slice(-100);
+    }
+    await convo.save();
+
     res.json({
       success: true,
-      data: parsed // { reply, mood }
+      data: parsed // { reply, mood, imageUrl }
     });
   } catch (error) {
     console.error('Chat API Error:', error);

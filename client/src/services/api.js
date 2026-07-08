@@ -175,6 +175,7 @@ export const paymentsAPI = {
 
 // ===== Chat API =====
 export const chatAPI = {
+  getHistory: () => API.get('/chat/history'),
   sendMessage: (data) => API.post('/chat', data),
 };
 

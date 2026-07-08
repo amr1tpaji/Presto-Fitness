@@ -23,17 +23,19 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
   const { addToast } = useContext(ToastContext);
 
   useEffect(() => {
-    if (user?._id) {
-      const saved = localStorage.getItem(`kitty_history_${user._id}`);
-      if (saved) {
+    const fetchHistory = async () => {
+      if (user?._id) {
         try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setMessages(parsed);
+          const res = await chatAPI.getHistory();
+          if (res.data?.data && res.data.data.length > 0) {
+            setMessages(res.data.data);
           }
-        } catch (e) {}
+        } catch (err) {
+          console.error('Failed to load chat history', err);
+        }
       }
-    }
+    };
+    fetchHistory();
   }, [user?._id]);
 
   useEffect(() => {
@@ -48,11 +50,7 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (user?._id && messages.length > 0) {
-      localStorage.setItem(`kitty_history_${user._id}`, JSON.stringify(messages));
-    }
-  }, [messages, user]);
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -76,12 +74,8 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
     setLoading(true);
 
     try {
-      // Exclude the very first greeting message or format everything properly.
-      const historyToPass = currentHistory.filter((_, idx) => idx !== 0);
-      
       const res = await chatAPI.sendMessage({
-        message: userMessage.text,
-        history: historyToPass
+        message: userMessage.text
       });
 
       const reply = res.data.data.reply;
@@ -115,10 +109,8 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
       setLoading(true);
 
       try {
-        const historyToPass = currentHistory.filter((_, idx) => idx !== 0);
         const res = await chatAPI.sendMessage({
-          message: text,
-          history: historyToPass
+          message: text
         });
 
         const reply = res.data.data.reply;
