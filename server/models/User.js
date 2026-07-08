@@ -97,6 +97,10 @@ const userSchema = new mongoose.Schema(
     planPdf: {
       type: String,
     },
+    kittyMemory: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,

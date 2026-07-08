@@ -23,6 +23,20 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
   const { addToast } = useContext(ToastContext);
 
   useEffect(() => {
+    if (user?._id) {
+      const saved = localStorage.getItem(`kitty_history_${user._id}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        } catch (e) {}
+      }
+    }
+  }, [user?._id]);
+
+  useEffect(() => {
     const checkUnread = async () => {
       try {
         const res = await messagesAPI.getUnreadCount();
@@ -33,6 +47,12 @@ export default function Chatbot({ isOpenExternal = null, setIsOpenExternal = nul
     const interval = setInterval(checkUnread, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (user?._id && messages.length > 0) {
+      localStorage.setItem(`kitty_history_${user._id}`, JSON.stringify(messages));
+    }
+  }, [messages, user]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -35,6 +35,20 @@ const adminTools = [
   {
     type: "function",
     function: {
+      name: "save_memory",
+      description: "Save an important fact or preference about the user into your long-term memory.",
+      parameters: {
+        type: "object",
+        properties: {
+          fact: { type: "string", description: "The fact to remember" }
+        },
+        required: ["fact"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "get_clients",
       description: "Get a list of all clients, including their names, emails, and IDs. Useful to find a client's ID.",
       parameters: { type: "object", properties: {}, required: [] }
@@ -73,6 +87,23 @@ const adminTools = [
   }
 ];
 
+const clientTools = [
+  {
+    type: "function",
+    function: {
+      name: "save_memory",
+      description: "Save an important fact or preference about the user into your long-term memory.",
+      parameters: {
+        type: "object",
+        properties: {
+          fact: { type: "string", description: "The fact to remember" }
+        },
+        required: ["fact"]
+      }
+    }
+  }
+];
+
 router.post('/', async (req, res, next) => {
   try {
     const { message, history } = req.body;
@@ -85,11 +116,15 @@ router.post('/', async (req, res, next) => {
       return res.status(500).json({ success: false, message: 'Groq API key is not configured on the server.' });
     }
 
-    let dynamicContext = "";
+    let dynamicContext = "\n\n[SYSTEM CONTEXT]\n";
+    if (req.user.kittyMemory && req.user.kittyMemory.length > 0) {
+      dynamicContext += `Your Memory regarding this user:\n${req.user.kittyMemory.map(m => "- " + m).join('\n')}\n\n`;
+    }
+
     if (req.user.role === 'admin') {
       try {
         const clientCount = await User.countDocuments({ role: 'client' });
-        dynamicContext = `\n\n[SYSTEM CONTEXT]\nCurrent Business Stats:\n- Total Registered Clients: ${clientCount}`;
+        dynamicContext += `Current Business Stats:\n- Total Registered Clients: ${clientCount}\n`;
       } catch (e) {
         console.error("Failed to fetch admin stats for Kitty", e);
       }
@@ -124,7 +159,10 @@ router.post('/', async (req, res, next) => {
         options.tools = adminTools;
         options.tool_choice = "auto";
       } else {
-        options.response_format = { type: 'json_object' };
+        options.tools = clientTools;
+        options.tool_choice = "auto";
+        // We do not use response_format: json_object here because some Llama3 endpoints
+        // fail when combining tools and JSON format. We rely on the prompt to enforce JSON.
       }
 
       const chatCompletion = await groq.chat.completions.create(options);
@@ -155,6 +193,10 @@ router.post('/', async (req, res, next) => {
               dailyTask.tasks.push({ type: 'custom', title: args.title, description: args.description, points: 10 });
               await dailyTask.save();
               toolResult = JSON.stringify({ success: true, message: 'Task assigned successfully.' });
+            } else if (toolCall.function.name === 'save_memory') {
+              req.user.kittyMemory.push(args.fact);
+              await req.user.save();
+              toolResult = JSON.stringify({ success: true, message: 'Memory saved.' });
             } else {
               toolResult = JSON.stringify({ error: 'Unknown function' });
             }
